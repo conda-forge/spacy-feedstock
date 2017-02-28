@@ -12,10 +12,9 @@ source:
   sha256: {{ sha256sum }}
 
 build:
-  number: 0
+  number: 1
   script: python setup.py install --single-version-externally-managed --record=record.txt
-  # At this time pathlib for win+py27 is missing.
-  skip: True  # [win32 or linux32 or (win and py2k)]
+  skip: True  # [win32 or linux32]
   features:
     - vc9   # [win and py27]
     - vc10  # [win and py34]
