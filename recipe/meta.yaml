@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "1.5.1" %}
-{% set sha256sum = "aed38766e0517ba4951498b0b18559f1ceab163482c194ef7f604afeed252e57" %}
+{% set version = "1.6.0" %}
+{% set sha256sum = "18df95985cebf017250d14bb2a6d5a97c3f5e58d54f7e2ac319246fd3d00d841" %}
 
 package:
   name: {{ name }}
@@ -35,7 +35,7 @@ requirements:
     - murmurhash >=0.26,<0.27
     - cymem >=1.30,<1.32.0
     - preshed >=0.46.1,<0.47
-    - thinc >=5.0.0,<5.1.0
+    - thinc >=6.2.0,<6.3.0
     - plac
     - six
     - cloudpickle
