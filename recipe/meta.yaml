@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "1.1.0" %}
-{% set sha256sum = "71d45c69ee4628105bc3ae9a8e777539d2c4c879a400cecb0462f50e6e7d8338" %}
+{% set version = "1.2.0" %}
+{% set sha256sum = "503595cbf2a36fc99ccc615650dbfb99f5357b53ccb857813ba28134ff823473" %}
 
 package:
   name: {{ name }}
@@ -33,7 +33,6 @@ requirements:
     - thinc >=5.0.0,<5.1.0
     - plac
     - six
-    - ujson
     - cloudpickle
     - pathlib  # [py2k]
     - sputnik >=0.9.2,<0.10.0
@@ -48,7 +47,6 @@ requirements:
     - thinc >=5.0.0,<5.1.0
     - plac
     - six
-    - ujson
     - cloudpickle
     - pathlib  # [py2k]
     - sputnik >=0.9.2,<0.10.0
