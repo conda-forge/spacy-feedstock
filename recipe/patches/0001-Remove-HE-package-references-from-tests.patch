@@ -1,0 +1,38 @@
+From e9f20208e8a0f61fcfe9fb18bc49df5ed9de65aa Mon Sep 17 00:00:00 2001
+From: Rolando Espinoza <rndmax84@gmail.com>
+Date: Mon, 27 Mar 2017 10:04:21 -0300
+Subject: [PATCH] Remove HE package references from tests
+
+---
+ spacy/tests/conftest.py          |  6 ------
+ spacy/tests/he/test_tokenizer.py | 17 -----------------
+ 2 files changed, 23 deletions(-)
+ delete mode 100644 spacy/tests/he/test_tokenizer.py
+
+diff --git a/spacy/tests/conftest.py b/spacy/tests/conftest.py
+index b2627f9..c13ebff 100644
+--- a/spacy/tests/conftest.py
++++ b/spacy/tests/conftest.py
+@@ -12,7 +12,6 @@ from ..sv import Swedish
+ from ..hu import Hungarian
+ from ..fi import Finnish
+ from ..bn import Bengali
+-from ..he import Hebrew
+ 
+ from ..tokens import Doc
+ from ..strings import StringStore
+@@ -79,11 +78,6 @@ def sv_tokenizer():
+ def bn_tokenizer():
+     return Bengali.Defaults.create_tokenizer()
+ 
+-  
+-@pytest.fixture  
+-def he_tokenizer():
+-    return Hebrew.Defaults.create_tokenizer()
+-
+ 
+ @pytest.fixture
+ def stringstore():
+-- 
+2.6.2
+
