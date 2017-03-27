@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "1.7.2" %}
-{% set sha256sum = "ef7b636d326cab6388639fcb86ada7a7f434831f1f693c28f78ec8a50bc9be6c" %}
+{% set version = "1.7.3" %}
+{% set sha256sum = "ff82b94f22455ed6d328b914a6340591fda442a3f8ee84bdbe23c7b845cc0e23" %}
 
 package:
   name: {{ name }}
@@ -10,10 +10,12 @@ source:
   fn: {{ name }}-{{ version }}.tar.gz
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: {{ sha256sum }}
+  patches:
+    - patches/0001-Remove-HE-package-references-from-tests.patch
 
 build:
   number: 0
-  script: python setup.py install --single-version-externally-managed --record=record.txt
+  script: python setup.py install -q --single-version-externally-managed --record=record.txt
   skip: True  # [not x86_64]
   features:
     - vc9   # [win and py27]
@@ -62,3 +64,4 @@ about:
 extra:
   recipe-maintainers:
     - rolando
+    - ines
