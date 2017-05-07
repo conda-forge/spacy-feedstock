@@ -42,7 +42,7 @@ requirements:
     - ujson >=1.35
     - dill >=0.2,<0.3
     - requests >=2.13.0,<3.0.0
-    - regex >=2017.04.05
+    - regex ==2017.04.05
     - ftfy >=4.4.2,<5.0.0
     - pip
 
