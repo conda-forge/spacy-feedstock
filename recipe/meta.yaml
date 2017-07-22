@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "1.8.2" %}
-{% set sha256sum = "dc0af2bd53e3387d447009bf90fa278e0bcf1e32d3c09ec43e7dfc871ad40716"
+{% set version = "1.9.0" %}
+{% set sha256sum = "89d5d62dca5fd58a8032ba9dcccc8666bafe21bac203abf32881ddf90179b0a6" %}
 
 package:
   name: {{ name }}
@@ -41,8 +41,8 @@ requirements:
     - pathlib  # [py2k]
     - ujson >=1.35
     - dill >=0.2,<0.3
-    - requests >=2.13.0,<3.0.0
-    - regex ==2017.4.5
+    - requests >=2.11.0,<3.0.0
+    - regex >=2017.4.1,<2017.12.1
     - ftfy >=4.4.2,<5.0.0
     - pip
 
