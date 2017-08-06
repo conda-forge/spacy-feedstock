@@ -48,6 +48,8 @@ requirements:
     - pip
 
 test:
+  requires:
+    - pytest
   imports:
     - spacy
 
