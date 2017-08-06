@@ -27,9 +27,10 @@ requirements:
     - setuptools
     - numpy x.x
     - numpy >=1.7
-
+    - libgcc     # [linux]
   run:
     - python
+    - libgcc     # [linux]
     - numpy x.x
     - numpy >=1.7
     - murmurhash >=0.26,<0.27
@@ -47,8 +48,8 @@ requirements:
     - pip
 
 test:
-  requires:
-    - pytest
+  imports:
+    - spacy
 
 about:
   home: https://spacy.io/
@@ -65,3 +66,4 @@ extra:
   recipe-maintainers:
     - rmax
     - ines
+    - danielfrg
