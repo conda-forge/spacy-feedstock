@@ -27,7 +27,7 @@ requirements:
     - setuptools
     - numpy x.x
     - numpy >=1.7
-    - libgcc     # [linux]
+    - gcc        # [linux]
   run:
     - python
     - libgcc     # [linux]
