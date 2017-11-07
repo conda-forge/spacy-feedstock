@@ -1,14 +1,14 @@
 {% set name = "spacy" %}
-{% set version = "1.9.0" %}
-{% set sha256sum = "89d5d62dca5fd58a8032ba9dcccc8666bafe21bac203abf32881ddf90179b0a6" %}
+{% set version = "2.0.0" %}
+{% set sha256sum = "779e07ac29e8825ebc9790cff8a3c14d66570dc02cce8a10829fc37fe8228914" %}
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  fn: {{ name }}-{{ version }}.tar.gz
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  fn: spacy-nighty-v2.0.0rc1.tar.gz
+  url: https://pypi.python.org/packages/d6/4c/a255a1a17245520f393b4facf62381611ca2384ac6bf3056fa499b2d5fe9/spacy-nightly-2.0.0rc1.tar.gz
   sha256: {{ sha256sum }}
 
 build:
@@ -25,19 +25,24 @@ requirements:
     - msinttypes  # [win and py27]
     - python
     - setuptools
-    - numpy x.x
-    - numpy >=1.7
+    # Pin numpy at build time with the minimum version available.
+    - numpy 1.8.*   # [not (win and (py35 or py36))]
+    - numpy 1.9.*   # [win and py35]
+    - numpy 1.11.*  # [win and py36]
 
   run:
     - python
     - numpy x.x
     - numpy >=1.7
-    - murmurhash >=0.26,<0.27
+    - numpy >=1.8   # [not (win and (py35 or py36))]
+    - numpy >=1.9   # [win and py35]
+    - numpy >=1.11  # [win and py36]
+    - murmurhash >=0.28,<0.30
     - cymem >=1.30,<1.32.0
     - preshed >=1.0.0,<2.0.0
-    - thinc >=6.5.0,<6.6.0
+    - thinc >=6.10.0,<6.11.0
     - plac >=0.9.6,<1.0.0
-    - six
+    - six >=1.10.0,<2.0.0
     - pathlib  # [py2k]
     - ujson >=1.35
     - dill >=0.2,<0.3
@@ -45,6 +50,8 @@ requirements:
     - regex >=2017.4.1,<2017.12.1
     - ftfy >=4.4.2,<5.0.0
     - pip
+    - msgpack-numpy >=0.4.1,<0.5.0
+    - msgpack-python >=0.4.8,<0.5.0
 
 test:
   requires:
