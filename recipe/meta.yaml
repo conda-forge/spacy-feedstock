@@ -12,7 +12,7 @@ source:
   sha256: {{ sha256sum }}
 
 build:
-  number: 0
+  number: 1
   script: python setup.py install -q --single-version-externally-managed --record=record.txt
   skip: True  # [not x86_64]
   features:
@@ -29,9 +29,10 @@ requirements:
     - numpy 1.8.*   # [not (win and (py35 or py36))]
     - numpy 1.9.*   # [win and py35]
     - numpy 1.11.*  # [win and py36]
-
+    - gcc        # [linux]
   run:
     - python
+    - libgcc     # [linux]
     - numpy x.x
     - numpy >=1.7
     - numpy >=1.8   # [not (win and (py35 or py36))]
@@ -56,6 +57,8 @@ requirements:
 test:
   requires:
     - pytest
+  imports:
+    - spacy
 
 about:
   home: https://spacy.io/
@@ -70,5 +73,6 @@ about:
 
 extra:
   recipe-maintainers:
-    - rolando
+    - rmax
     - ines
+    - danielfrg
