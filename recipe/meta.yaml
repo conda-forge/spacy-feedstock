@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "1.9.0" %}
-{% set sha256sum = "89d5d62dca5fd58a8032ba9dcccc8666bafe21bac203abf32881ddf90179b0a6" %}
+{% set version = "2.0.2.dev0" %}
+{% set sha256sum = "6062a50c072326b341bbea7ffb3ceab9d0fbfc47672d05d7ce225b3f8f3e6726" %}
 
 package:
   name: {{ name }}
@@ -12,7 +12,7 @@ source:
   sha256: {{ sha256sum }}
 
 build:
-  number: 1
+  number: 0
   script: python setup.py install -q --single-version-externally-managed --record=record.txt
   skip: True  # [not x86_64]
   features:
@@ -25,20 +25,24 @@ requirements:
     - msinttypes  # [win and py27]
     - python
     - setuptools
-    - numpy x.x
-    - numpy >=1.7
+    # Pin numpy at build time with the minimum version available.
+    - numpy 1.8.*   # [not (win and (py35 or py36))]
+    - numpy 1.9.*   # [win and py35]
+    - numpy 1.11.*  # [win and py36]
     - gcc        # [linux]
   run:
     - python
     - libgcc     # [linux]
-    - numpy x.x
     - numpy >=1.7
-    - murmurhash >=0.26,<0.27
+    - numpy >=1.8   # [not (win and (py35 or py36))]
+    - numpy >=1.9   # [win and py35]
+    - numpy >=1.11  # [win and py36]
+    - murmurhash >=0.28,<0.30
     - cymem >=1.30,<1.32.0
     - preshed >=1.0.0,<2.0.0
-    - thinc >=6.5.0,<6.6.0
+    - thinc >=6.10.0,<6.11.0
     - plac >=0.9.6,<1.0.0
-    - six
+    - six >=1.10.0,<2.0.0
     - pathlib  # [py2k]
     - ujson >=1.35
     - dill >=0.2,<0.3
@@ -46,10 +50,13 @@ requirements:
     - regex >=2017.4.1,<2017.12.1
     - ftfy >=4.4.2,<5.0.0
     - pip
+    - msgpack-numpy >=0.4.1,<0.5.0
+    - msgpack-python >=0.4.8,<0.5.0
 
 test:
   requires:
     - pytest
+    - mock
   imports:
     - spacy
 
