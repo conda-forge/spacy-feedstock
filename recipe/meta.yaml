@@ -1,6 +1,7 @@
 {% set name = "spacy" %}
-{% set version = "2.0.4" %}
-{% set sha256sum = "89f6d7aebc63e4b917a804fdc7d786e46827d859e9476b72faf5a559846d1b20" %}
+{% set version = "2.0.6.dev0" %}
+{% set sha256sum = "741a172dc8baff9c9bdeb7167773e07d8e1f98150933432dc6c2cf8609b3192c" %}
+
 package:
   name: {{ name }}
   version: {{ version }}
@@ -69,7 +70,7 @@ about:
   description: |
     spaCy is a library for advanced natural language processing in Python and
     Cython.
-  doc_url: https://spacy.io/docs
+  doc_url: https://spacy.io
   dev_url: https://github.com/spacy-io/spaCy
 
 extra:
