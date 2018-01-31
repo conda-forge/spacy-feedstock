@@ -1,19 +1,18 @@
 {% set name = "spacy" %}
-{% set version = "2.0.4" %}
-{% set sha256sum = "89f6d7aebc63e4b917a804fdc7d786e46827d859e9476b72faf5a559846d1b20" %}
+{% set version = "2.0.6.dev0" %}
+{% set sha256sum = "741a172dc8baff9c9bdeb7167773e07d8e1f98150933432dc6c2cf8609b3192c" %}
+
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
   fn: {{ name }}-{{ version }}.tar.gz
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  url: https://files.pythonhosted.org/packages/76/22/24579c1309c2321813d224d94a52d8c41f660387da72264104cff592ec6d/spacy-2.0.6.dev0.tar.gz
   sha256: {{ sha256sum }}
-  patches:
-    - patches/0001-Use-generic-optimizations.patch  # [linux]
 
 build:
-  number: 0
+  number: 2
   script: python setup.py install -q --single-version-externally-managed --record=record.txt
   skip: True  # [not x86_64]
   features:
@@ -41,7 +40,7 @@ requirements:
     - murmurhash >=0.28,<0.30
     - cymem >=1.30,<1.32.0
     - preshed >=1.0.0,<2.0.0
-    - thinc >=6.10.0,<6.11.0
+    - thinc >=6.10.1,<6.11.0
     - plac >=0.9.6,<1.0.0
     - six >=1.10.0,<2.0.0
     - pathlib  # [py2k]
@@ -69,7 +68,7 @@ about:
   description: |
     spaCy is a library for advanced natural language processing in Python and
     Cython.
-  doc_url: https://spacy.io/docs
+  doc_url: https://spacy.io
   dev_url: https://github.com/spacy-io/spaCy
 
 extra:
