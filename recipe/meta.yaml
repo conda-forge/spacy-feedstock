@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "2.0.6.dev0" %}
-{% set sha256sum = "741a172dc8baff9c9bdeb7167773e07d8e1f98150933432dc6c2cf8609b3192c" %}
+{% set version = "2.0.6" %}
+{% set sha256sum = "4eec0494584d3af140b301379fa8eb909dd266d21497316c1d1662a3855e5e35" %}
 
 package:
   name: {{ name }}
@@ -8,7 +8,7 @@ package:
 
 source:
   fn: {{ name }}-{{ version }}.tar.gz
-  url: https://files.pythonhosted.org/packages/76/22/24579c1309c2321813d224d94a52d8c41f660387da72264104cff592ec6d/spacy-2.0.6.dev0.tar.gz
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: {{ sha256sum }}
 
 build:
