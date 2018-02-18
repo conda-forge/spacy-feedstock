@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "2.0.7" %}
-{% set sha256sum = "1d5aac321bfdb4df673147f4140487e58d4f6611ad5703b086cc08717f6f6c59" %}
+{% set version = "2.0.8" %}
+{% set sha256sum = "4b222ef4b9240d8f9392a1f2390e61302373f7137c826978e67e566be507c17a" %}
 
 package:
   name: {{ name }}
@@ -12,7 +12,7 @@ source:
   sha256: {{ sha256sum }}
 
 build:
-  number: 2
+  number: 0
   script: python setup.py install -q --single-version-externally-managed --record=record.txt
   skip: True  # [not x86_64]
   features:
@@ -49,6 +49,7 @@ requirements:
     - requests >=2.11.0,<3.0.0
     - regex >=2017.4.1,<2017.12.1
     - ftfy >=4.4.2,<5.0.0
+    - html5lib ==1.0.b8
     - pip
     - msgpack-numpy >=0.4.1,<0.5.0
     - msgpack-python >=0.4.8,<0.5.0
