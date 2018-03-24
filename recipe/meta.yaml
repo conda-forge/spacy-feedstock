@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "2.0.8" %}
-{% set sha256sum = "4b222ef4b9240d8f9392a1f2390e61302373f7137c826978e67e566be507c17a" %}
+{% set version = "2.0.10" %}
+{% set sha256sum = "fd0795c42d06dd3dc7b3f851760df7d158424e30e09d7cfbeefcceb887b97d25" %}
 
 package:
   name: {{ name }}
@@ -50,8 +50,8 @@ requirements:
     - regex >=2017.4.1,<2017.12.1
     - ftfy >=4.4.2,<5.0.0
     - pip
-    - msgpack-numpy >=0.4.1,<0.5.0
-    - msgpack-python >=0.4.8,<0.5.0
+    - msgpack-numpy==0.4.1
+    - msgpack-python==0.5.4
 
 test:
   requires:
