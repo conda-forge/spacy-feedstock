@@ -16,14 +16,16 @@ Cython.
 Current build status
 ====================
 
-Linux: [![Circle CI](https://circleci.com/gh/conda-forge/spacy-feedstock.svg?style=shield)](https://circleci.com/gh/conda-forge/spacy-feedstock)
-OSX: [![TravisCI](https://travis-ci.org/conda-forge/spacy-feedstock.svg?branch=master)](https://travis-ci.org/conda-forge/spacy-feedstock)
-Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/conda-forge/spacy-feedstock?svg=True)](https://ci.appveyor.com/project/conda-forge/spacy-feedstock/branch/master)
+[![Linux](https://img.shields.io/circleci/project/github/conda-forge/spacy-feedstock/master.svg?label=Linux)](https://circleci.com/gh/conda-forge/spacy-feedstock)
+[![OSX](https://img.shields.io/travis/conda-forge/spacy-feedstock/master.svg?label=macOS)](https://travis-ci.org/conda-forge/spacy-feedstock)
+[![Windows](https://img.shields.io/appveyor/ci/conda-forge/spacy-feedstock/master.svg?label=Windows)](https://ci.appveyor.com/project/conda-forge/spacy-feedstock/branch/master)
 
 Current release info
 ====================
-Version: [![Anaconda-Server Badge](https://anaconda.org/conda-forge/spacy/badges/version.svg)](https://anaconda.org/conda-forge/spacy)
-Downloads: [![Anaconda-Server Badge](https://anaconda.org/conda-forge/spacy/badges/downloads.svg)](https://anaconda.org/conda-forge/spacy)
+
+| Name | Downloads | Version | Platforms |
+| --- | --- | --- | --- |
+| [![Conda Recipe](https://img.shields.io/badge/recipe-spacy-green.svg)](https://anaconda.org/conda-forge/spacy) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/spacy.svg)](https://anaconda.org/conda-forge/spacy) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/spacy.svg)](https://anaconda.org/conda-forge/spacy) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/spacy.svg)](https://anaconda.org/conda-forge/spacy) |
 
 Installing spacy
 ================
