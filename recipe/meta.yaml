@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "2.0.12.dev1" %}
-{% set sha256sum = "0e9f551ef18ba0871f45fca028f589a144cbbb3ec4eed1b8893dbe3c5f08cef7" %}
+{% set version = "2.0.12" %}
+{% set sha256sum = "b220ebee412c19613c26b2c1870b60473834bd686cec49553ce5f184164d3359" %}
 package:
   name: {{ name }}
   version: {{ version }}
@@ -39,12 +39,13 @@ requirements:
     - murmurhash >=0.28,<0.30
     - cymem >=1.30,<1.32.0
     - preshed >=1.0.0,<2.0.0
-    - thinc ==6.10.3.dev1
+    - thinc >=6.10.3,<6.11.0
     - plac >=0.9.6,<1.0.0
-    - pathlib  # [py2k]
+    - pathlib ==1.0.1 # [py2k]
     - ujson >=1.35
     - dill >=0.2,<0.3
     - regex >=2017.4.5,<2017.12.1
+    - requests >=2.13.0,<3.0.0
 
 test:
   requires:
