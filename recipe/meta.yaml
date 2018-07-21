@@ -20,7 +20,8 @@ build:
 
 requirements:
   build:
-    - toolchain   # [unix]
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
     - msinttypes  # [win and py27]
     - python
     - setuptools
