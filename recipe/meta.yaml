@@ -41,7 +41,7 @@ requirements:
     - preshed >=1.0.0,<2.0.0
     - thinc >=6.10.3,<6.11.0
     - plac >=0.9.6,<1.0.0
-    - pathlib ==1.0.1 # [py2k]
+    - pathlib ==1.0.1  # [py2k]
     - ujson >=1.35
     - dill >=0.2,<0.3
     - regex >=2017.4.5,<2017.12.1
