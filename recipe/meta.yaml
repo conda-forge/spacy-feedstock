@@ -60,4 +60,7 @@ about:
 
 extra:
   recipe-maintainers:
-    - ["rmax", "ines", "danielfrg", "honnibal"]
+    - rmax
+    - honnibal
+    - ines
+    - danielfrg
