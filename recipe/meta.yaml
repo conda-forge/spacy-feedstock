@@ -1,6 +1,7 @@
 {% set name = "spacy" %}
-{% set version = "2.0.11" %}
-{% set sha256sum = "cddb06e7965222e4339eb59d2258db8dadab19ef8b0a1a44a2d33f94935ba421" %}
+{% set version = "2.0.12" %}
+{% set sha256sum = "b220ebee412c19613c26b2c1870b60473834bd686cec49553ce5f184164d3359" %}
+
 package:
   name: {{ name }}
   version: {{ version }}
@@ -11,15 +12,17 @@ source:
   sha256: {{ sha256sum }}
 
 build:
-  number: 1
-  script: python setup.py install -q --single-version-externally-managed --record=record.txt
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
   skip: True  # [not x86_64]
 
 requirements:
   build:
+    - pip
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
   host:
+    - pip
     - msinttypes  # [win and py27]
     - python
     - setuptools
@@ -30,12 +33,14 @@ requirements:
     - murmurhash >=0.28,<0.30
     - cymem >=1.30,<1.32.0
     - preshed >=1.0.0,<2.0.0
-    - thinc >=6.10.1,<6.11.0
+    - thinc >=6.10.3,<6.11.0
     - plac >=0.9.6,<1.0.0
     - pathlib  # [py27]
     - ujson >=1.35
     - dill >=0.2,<0.3
     - regex >=2017.4.5,<2017.12.1
+    - requests >=2.13.0,<3.0.0
+    - msgpack-python >=0.5.0
 
 test:
   requires:
@@ -58,5 +63,6 @@ about:
 extra:
   recipe-maintainers:
     - rmax
+    - honnibal
     - ines
     - danielfrg
