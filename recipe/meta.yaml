@@ -27,6 +27,7 @@ requirements:
     - python
     - setuptools
     - numpy 1.15.*
+    - wheel
   run:
     - python
     - {{ pin_compatible('numpy', min_pin='1.15.x') }}
@@ -45,7 +46,7 @@ requirements:
 
 test:
   requires:
-    - pytest
+    - pytest <4
     - mock
   imports:
     - spacy
