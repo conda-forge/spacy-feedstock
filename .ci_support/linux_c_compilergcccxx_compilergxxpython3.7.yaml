@@ -9,9 +9,7 @@ channel_targets:
 cxx_compiler:
 - gxx
 docker_image:
-- conda/c3i-linux-64
-numpy:
-- '1.9'
+- condaforge/linux-anvil-comp7
 pin_run_as_build:
   python:
     min_pin: x.x
