@@ -39,7 +39,7 @@ requirements:
     - pathlib  # [py27]
     - ujson >=1.35
     - dill >=0.2,<0.3
-    - regex >=2017.4.5,<2017.12.1
+    - regex =2018.01.10
     - requests >=2.13.0,<3.0.0
     - msgpack-python >=0.5.0
 
