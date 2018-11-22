@@ -26,7 +26,7 @@ requirements:
     - python
     - setuptools
     - numpy 1.15.*
-    - wheel
+    - wheel >=0.32,<0.33
   run:
     - python
     - {{ pin_compatible('numpy', min_pin='1.15.x') }}
