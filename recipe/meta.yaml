@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "2.0.13" %}
-{% set sha256sum = "5621c1edf004f54f163bb3d922303675001dfce5fea50f93d6ecb59f5d1d4610" %}
+{% set version = "2.0.16" %}
+{% set sha256sum = "41de9353994aa782deb66a14742219b205ecd59fe11290ce39c4b914d05e0fbe" %}
 
 package:
   name: {{ name }}
@@ -12,13 +12,12 @@ source:
   sha256: {{ sha256sum }}
 
 build:
-  number: 0
+  number: 1000
   script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
   skip: True  # [not x86_64]
 
 requirements:
   build:
-    - pip
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
   host:
@@ -26,25 +25,27 @@ requirements:
     - msinttypes  # [win and py27]
     - python
     - setuptools
-    - numpy
+    - numpy 1.15.*
+    - wheel >=0.32,<0.33
   run:
     - python
-    - {{ pin_compatible('numpy') }}
-    - murmurhash >=0.28,<0.30
-    - cymem >=1.30,<1.32.0
-    - preshed >=1.0.0,<2.0.0
-    - thinc >=6.10.3,<6.11.0
+    - {{ pin_compatible('numpy', min_pin='1.15.x') }}
+      # msgpack-numpy
+    - murmurhash >=0.28,<1.1.0
+    - cymem >=2.0.0,<2.1.0
+    - preshed >=2.0.1,<2.1.0
+    - thinc >=6.12.0,<6.13.0
     - plac >=0.9.6,<1.0.0
     - pathlib  # [py27]
     - ujson >=1.35
     - dill >=0.2,<0.3
-    - regex >=2017.4.5,<2017.12.1
+    - regex =2018.01.10
     - requests >=2.13.0,<3.0.0
     - msgpack-python >=0.5.0
 
 test:
   requires:
-    - pytest
+    - pytest <4
     - mock
   imports:
     - spacy
