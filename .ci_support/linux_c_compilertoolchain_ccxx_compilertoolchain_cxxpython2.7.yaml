@@ -1,3 +1,5 @@
+build_number_decrement:
+- '1000'
 c_compiler:
 - toolchain_c
 channel_sources:
@@ -8,11 +10,16 @@ cxx_compiler:
 - toolchain_cxx
 docker_image:
 - condaforge/linux-anvil
-numpy:
-- '1.9'
 pin_run_as_build:
   python:
     min_pin: x.x
     max_pin: x.x
 python:
 - '2.7'
+zip_keys:
+- - c_compiler
+  - cxx_compiler
+  - channel_sources
+  - channel_targets
+  - docker_image
+  - build_number_decrement
