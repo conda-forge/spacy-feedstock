@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "2.0.18" %}
-{% set sha256sum = "123f3b70afa16516ffe458cd8718793e4aab8ab10085a9d0dc121076746dcb57" %}
+{% set version = "2.1.1" %}
+{% set sha256sum = "809561162007bdda8a8a07cded52983e848b1a83de6dc3e8b025007bbcdb3994" %}
 
 package:
   name: {{ name }}
@@ -12,7 +12,7 @@ source:
   sha256: {{ sha256sum }}
 
 build:
-  number: 1000
+  number: 0
   script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
   skip: True  # [not x86_64]
 
