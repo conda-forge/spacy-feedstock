@@ -34,7 +34,7 @@ requirements:
     - cymem >=2.0.2,<2.1.0
     - preshed >=2.0.1,<2.1.0
     - thinc >=7.0.4,<7.1.0
-    - blis >=0.2.2,<0.3.0
+    - cython-blis >=0.2.2,<0.3.0
     - plac <1.0.0,>=0.9.6
     - requests >=2.13.0,<3.0.0
     - jsonschema >=2.6.0,<3.0.0
