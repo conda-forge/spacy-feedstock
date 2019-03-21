@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "2.0.18" %}
-{% set sha256sum = "123f3b70afa16516ffe458cd8718793e4aab8ab10085a9d0dc121076746dcb57" %}
+{% set version = "2.1.1" %}
+{% set sha256sum = "809561162007bdda8a8a07cded52983e848b1a83de6dc3e8b025007bbcdb3994" %}
 
 package:
   name: {{ name }}
@@ -11,18 +11,18 @@ source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: {{ sha256sum }}
 
+
 build:
-  number: 1000
+  number: 0
   script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
-  skip: True  # [not x86_64]
+  skip: true  # [(win and py27) or (osx and py27)]
 
 requirements:
   build:
-    - {{ compiler('c') }}
+    - pip
     - {{ compiler('cxx') }}
   host:
     - pip
-    - msinttypes  # [win and py27]
     - python
     - setuptools
     - numpy 1.15.*
@@ -30,25 +30,26 @@ requirements:
   run:
     - python
     - {{ pin_compatible('numpy', min_pin='1.15.x') }}
-      # msgpack-numpy
-    - murmurhash >=0.28,<1.1.0
-    - cymem >=2.0.0,<2.1.0
+    - murmurhash >=0.28.0,<1.1.0
+    - cymem >=2.0.2,<2.1.0
     - preshed >=2.0.1,<2.1.0
-    - thinc >=6.12.0,<6.13.0
-    - plac >=0.9.6,<1.0.0
-    - pathlib  # [py27]
-    - ujson >=1.35
-    - dill >=0.2,<0.3
-    - regex =2018.01.10
+    - thinc >=7.0.4,<7.1.0
+    - cython-blis >=0.2.2,<0.3.0
+    - plac <1.0.0,>=0.9.6
     - requests >=2.13.0,<3.0.0
-    - msgpack-python >=0.5.0
-
+    - jsonschema >=2.6.0,<3.0.0
+    - wasabi >=0.0.12,<1.1.0
+    - srsly >=0.0.5,<1.1.0
+    - pathlib >=1.0.0,<2.0.0  # [py27]
+ 
 test:
   requires:
     - pytest <4
     - mock
   imports:
     - spacy
+  commands:
+    - python -m pytest --tb=native --pyargs {{ name }}
 
 about:
   home: https://spacy.io/
