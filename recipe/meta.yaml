@@ -30,7 +30,6 @@ requirements:
   host:
     - pip
     - python
-    - setuptools
     - numpy 1.15.*
     - wheel  
     - cython >=0.25
