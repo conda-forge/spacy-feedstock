@@ -53,7 +53,7 @@ requirements:
  
 test:
   requires:
-    - pytest <4
+    - pytest
     - mock
   imports:
     - spacy
