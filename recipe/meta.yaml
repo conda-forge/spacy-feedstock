@@ -49,6 +49,7 @@ requirements:
     - requests >=2.13.0,<3.0.0
     - wasabi >=0.2.0,<1.1.0
     - srsly >=0.1.0,<1.1.0
+    - jsonschema
     - pathlib >=1.0.0,<2.0.0  # [py27]
  
 test:
