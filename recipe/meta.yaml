@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "2.2.1" %}
-{% set sha256sum = "b65fb11388212519bb0880d9ae3a1eb760e5956da40b329d014193887a1b03a9" %}
+{% set version = "2.2.2" %}
+{% set sha256sum = "4a1b47a1af437f43987384cd6d8061f5b3e8985f0f2b323f9644ba8e733e79a4" %}
 
 package:
   name: {{ name }}
@@ -10,6 +10,8 @@ source:
   fn: {{ name }}-{{ version }}.tar.gz
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: {{ sha256sum }}
+  patches:
+      patches/0002-skip-multiproc-test.patch
 
 
 build:
@@ -26,7 +28,7 @@ requirements:
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
     - murmurhash >=0.28.0,<1.1.0
-    - thinc >=7.1.1,<7.2.0
+    - thinc >=7.3.0,<7.4.0
   host:
     - pip
     - python
@@ -36,14 +38,14 @@ requirements:
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
     - murmurhash >=0.28.0,<1.1.0
-    - thinc >=7.1.1,<7.2.0
+    - thinc >=7.3.0,<7.4.0
   run:
     - python
     - {{ pin_compatible('numpy', min_pin='1.15.x') }}
     - murmurhash >=0.28.0,<1.1.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
-    - thinc >=7.1.1,<7.2.0
+    - thinc >=7.3.0,<7.4.0
     - cython-blis >=0.4.0,<0.5.0
     - plac <1.0.0,>=0.9.6
     - requests >=2.13.0,<3.0.0
@@ -51,6 +53,7 @@ requirements:
     - srsly >=0.1.0,<1.1.0
     - jsonschema
     - pathlib >=1.0.0,<2.0.0  # [py27]
+    - importlib_metadata >=0.20
  
 test:
   requires:
