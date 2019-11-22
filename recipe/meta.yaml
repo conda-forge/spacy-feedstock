@@ -1,39 +1,28 @@
-{% set name = "spacy" %}
 {% set version = "2.2.2" %}
-{% set sha256sum = "4a1b47a1af437f43987384cd6d8061f5b3e8985f0f2b323f9644ba8e733e79a4" %}
 
 package:
-  name: {{ name }}
+  name: spacy
   version: {{ version }}
 
 source:
-  fn: {{ name }}-{{ version }}.tar.gz
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: {{ sha256sum }}
+  url: https://pypi.io/packages/source/s/spacy/spacy-{{ version }}.tar.gz
+  sha256: 4a1b47a1af437f43987384cd6d8061f5b3e8985f0f2b323f9644ba8e733e79a4
   patches:
       patches/0002-skip-multiproc-test.patch
 
 
 build:
-  number: 0
-  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
+  number: 1
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
   skip: true  # [(win and py27) or (osx and py27)]
 
 requirements:
   build:
-    - pip
-    - {{ compiler('cxx') }}
-    - wheel
-    - cython >=0.25
-    - cymem >=2.0.2,<2.1.0
-    - preshed >=3.0.2,<3.1.0
-    - murmurhash >=0.28.0,<1.1.0
-    - thinc >=7.3.0,<7.4.0
+    - {{ compiler('cxx') }} 
   host:
-    - pip
     - python
-    - numpy 1.15.*
-    - wheel  
+    - pip
+    - wheel
     - cython >=0.25
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
@@ -62,7 +51,7 @@ test:
   imports:
     - spacy
   commands:
-    - python -m pytest --tb=native --pyargs {{ name }}
+    - python -m pytest --tb=native --pyargs spacy
 
 about:
   home: https://spacy.io/
