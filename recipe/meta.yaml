@@ -32,7 +32,7 @@ requirements:
   host:
     - pip
     - python
-    - numpy 1.15.*
+    - numpy
     - wheel  
     - cython >=0.25
     - cymem >=2.0.2,<2.1.0
@@ -41,7 +41,7 @@ requirements:
     - thinc >=7.3.0,<7.4.0
   run:
     - python
-    - {{ pin_compatible('numpy', min_pin='1.15.x') }}
+    - {{ pin_compatible('numpy') }}
     - murmurhash >=0.28.0,<1.1.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
