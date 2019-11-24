@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "2.2.2" %}
-{% set sha256sum = "4a1b47a1af437f43987384cd6d8061f5b3e8985f0f2b323f9644ba8e733e79a4" %}
+{% set version = "2.2.3" %}
+{% set sha256sum = "1d14c9e7d65b2cecd56c566d9ffac8adbcb9ce2cff2274cbfdcf5468cd940e6a" %}
 
 package:
   name: {{ name }}
@@ -47,6 +47,7 @@ requirements:
     - preshed >=3.0.2,<3.1.0
     - thinc >=7.3.0,<7.4.0
     - cython-blis >=0.4.0,<0.5.0
+    - catalogue >=0.0.7,<1.1.0
     - plac <1.0.0,>=0.9.6
     - requests >=2.13.0,<3.0.0
     - wasabi >=0.2.0,<1.1.0
