@@ -32,7 +32,7 @@ requirements:
   host:
     - pip
     - python
-    - numpy
+    - numpy 1.16.*
     - wheel  
     - cython >=0.25
     - cymem >=2.0.2,<2.1.0
