@@ -53,7 +53,7 @@ requirements:
     - srsly >=1.0.2,<1.1.0
     - jsonschema
     - pathlib >=1.0.0,<2.0.0  # [py27]
-    - importlib_metadata >=0.20
+    - importlib_metadata >=0.20,<2.0.0
 
 test:
   requires:
