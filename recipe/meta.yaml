@@ -23,6 +23,7 @@ requirements:
     - pip
     - {{ compiler('cxx') }}
     - wheel
+    - importlib_metadata >=0.20
     - cython >=0.25
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
@@ -33,6 +34,7 @@ requirements:
     - python
     - numpy 1.16.*
     - wheel
+    - importlib_metadata >=0.20
     - cython >=0.25
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
