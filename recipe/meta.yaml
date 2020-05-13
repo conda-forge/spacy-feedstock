@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "2.2.3" %}
-{% set sha256sum = "1d14c9e7d65b2cecd56c566d9ffac8adbcb9ce2cff2274cbfdcf5468cd940e6a" %}
+{% set version = "2.2.4" %}
+{% set sha256sum = "f0f3a67c5841e6e35d62c98f40ebb3d132587d3aba4f4dccac5056c4e90ff5b9" %}
 
 package:
   name: {{ name }}
@@ -10,13 +10,12 @@ source:
   fn: {{ name }}-{{ version }}.tar.gz
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: {{ sha256sum }}
-  patches:
-      patches/0002-skip-multiproc-test.patch
+  patches: patches/0002-skip-multiproc-test.patch
 
 
 build:
   number: 0
-  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv"
+  script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
   skip: true  # [(win and py27) or (osx and py27)]
 
 requirements:
@@ -28,34 +27,36 @@ requirements:
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
     - murmurhash >=0.28.0,<1.1.0
-    - thinc >=7.3.0,<7.4.0
+    - thinc ==7.4.0
+    - importlib-metadata >=0.20
   host:
     - pip
     - python
     - numpy 1.16.*
-    - wheel  
+    - wheel
     - cython >=0.25
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
     - murmurhash >=0.28.0,<1.1.0
-    - thinc >=7.3.0,<7.4.0
+    - thinc ==7.4.0
+    - importlib_metadata >=0.20
   run:
     - python
     - {{ pin_compatible('numpy') }}
     - murmurhash >=0.28.0,<1.1.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
-    - thinc >=7.3.0,<7.4.0
+    - thinc ==7.4.0
     - cython-blis >=0.4.0,<0.5.0
     - catalogue >=0.0.7,<1.1.0
     - plac <1.0.0,>=0.9.6
     - requests >=2.13.0,<3.0.0
-    - wasabi >=0.2.0,<1.1.0
-    - srsly >=0.1.0,<1.1.0
+    - wasabi >=0.4.0,<1.1.0
+    - srsly >=1.0.2,<1.1.0
     - jsonschema
     - pathlib >=1.0.0,<2.0.0  # [py27]
-    - importlib_metadata >=0.20
- 
+    - importlib-metadata >=0.20
+
 test:
   requires:
     - pytest
