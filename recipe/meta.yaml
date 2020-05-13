@@ -28,6 +28,7 @@ requirements:
     - preshed >=3.0.2,<3.1.0
     - murmurhash >=0.28.0,<1.1.0
     - thinc ==7.4.0
+    - importlib-metadata >=0.20
   host:
     - pip
     - python
@@ -38,6 +39,7 @@ requirements:
     - preshed >=3.0.2,<3.1.0
     - murmurhash >=0.28.0,<1.1.0
     - thinc ==7.4.0
+    - importlib_metadata >=0.20
   run:
     - python
     - {{ pin_compatible('numpy') }}
