@@ -27,7 +27,7 @@ requirements:
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
     - murmurhash >=0.28.0,<1.1.0
-    - thinc ==7.4.0
+    - thinc ==7.4.1
     - importlib-metadata >=0.20
   host:
     - pip
@@ -38,7 +38,7 @@ requirements:
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
     - murmurhash >=0.28.0,<1.1.0
-    - thinc ==7.4.0
+    - thinc ==7.4.1
     - importlib_metadata >=0.20
   run:
     - python
@@ -46,7 +46,7 @@ requirements:
     - murmurhash >=0.28.0,<1.1.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
-    - thinc ==7.4.0
+    - thinc ==7.4.1
     - cython-blis >=0.4.0,<0.5.0
     - catalogue >=0.0.7,<1.1.0
     - plac <1.0.0,>=0.9.6
