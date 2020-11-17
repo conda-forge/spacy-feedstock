@@ -20,26 +20,18 @@ build:
 
 requirements:
   build:
-    - pip
     - {{ compiler('cxx') }}
-    - wheel
-    - cython >=0.25
-    - cymem >=2.0.2,<2.1.0
-    - preshed >=3.0.2,<3.1.0
-    - murmurhash >=0.28.0,<1.1.0
-    - thinc ==7.4.1
-    - importlib-metadata >=0.20
   host:
     - pip
     - python
-    - numpy 1.16.*
+    - numpy 1.19.*
+    - setuptools
     - wheel
     - cython >=0.25
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
     - murmurhash >=0.28.0,<1.1.0
     - thinc ==7.4.1
-    - importlib_metadata >=0.20
   run:
     - python
     - {{ pin_compatible('numpy') }}
@@ -55,7 +47,7 @@ requirements:
     - srsly >=1.0.2,<1.1.0
     - jsonschema
     - pathlib >=1.0.0,<2.0.0  # [py27]
-    - importlib-metadata >=0.20
+    - importlib-metadata >=0.20  # [py<=37]
 
 test:
   requires:
