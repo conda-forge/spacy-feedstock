@@ -1,7 +1,53 @@
-diff --git a/include/numpy/__multiarray_api.h b/include/numpy/__multiarray_api.h
-index c949d732f..b9e197b9c 100644
---- a/include/numpy/__multiarray_api.h
-+++ b/include/numpy/__multiarray_api.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/arrayobject.h spacy-2.3.2/include/numpy/arrayobject.h
+--- spacy-2.3.2-orig/include/numpy/arrayobject.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/arrayobject.h	2020-11-11 13:37:37.426412820 +0100
+@@ -1,14 +1,3 @@
+-
+-/* This expects the following variables to be defined (besides
+-   the usual ones from pyconfig.h
+-
+-   SIZEOF_LONG_DOUBLE -- sizeof(long double) or sizeof(double) if no
+-                         long double is present on platform.
+-   CHAR_BIT       --     number of bits in a char (usually 8)
+-                         (should be in limits.h)
+-
+-*/
+-
+ #ifndef Py_ARRAYOBJECT_H
+ #define Py_ARRAYOBJECT_H
+ 
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/arrayscalars.h spacy-2.3.2/include/numpy/arrayscalars.h
+--- spacy-2.3.2-orig/include/numpy/arrayscalars.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/arrayscalars.h	2020-11-11 13:37:37.422412633 +0100
+@@ -135,7 +135,13 @@
+ } PyScalarObject;
+ 
+ #define PyStringScalarObject PyStringObject
+-#define PyUnicodeScalarObject PyUnicodeObject
++#define PyStringScalarObject PyStringObject
++typedef struct {
++        /* note that the PyObject_HEAD macro lives right here */
++        PyUnicodeObject base;
++        Py_UCS4 *obval;
++} PyUnicodeScalarObject;
++
+ 
+ typedef struct {
+         PyObject_VAR_HEAD
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/halffloat.h spacy-2.3.2/include/numpy/halffloat.h
+--- spacy-2.3.2-orig/include/numpy/halffloat.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/halffloat.h	2020-11-11 13:37:37.426412820 +0100
+@@ -37,6 +37,7 @@
+ npy_half npy_half_copysign(npy_half x, npy_half y);
+ npy_half npy_half_spacing(npy_half h);
+ npy_half npy_half_nextafter(npy_half x, npy_half y);
++npy_half npy_half_divmod(npy_half x, npy_half y, npy_half *modulus);
+ 
+ /*
+  * Half-precision constants
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/__multiarray_api.h spacy-2.3.2/include/numpy/__multiarray_api.h
+--- spacy-2.3.2-orig/include/numpy/__multiarray_api.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/__multiarray_api.h	2020-11-11 13:37:37.422412633 +0100
 @@ -1,787 +1,623 @@
  
 -#ifdef _MULTIARRAYMODULE
@@ -842,38 +888,31 @@ index c949d732f..b9e197b9c 100644
 -#else
 -    NPY_NO_EXPORT PyTypeObject PyTimeIntegerArrType_Type;
 -#endif
-+NPY_NO_EXPORT  PyObject* PyArray_NeighborhoodIterNew \
-+       (PyArrayIterObject *, const npy_intp *, int, PyArrayObject*);
-+extern NPY_NO_EXPORT PyTypeObject PyTimeIntegerArrType_Type;
- 
+-
 -#ifdef NPY_ENABLE_SEPARATE_COMPILATION
 -    extern NPY_NO_EXPORT PyTypeObject PyDatetimeArrType_Type;
 -#else
 -    NPY_NO_EXPORT PyTypeObject PyDatetimeArrType_Type;
 -#endif
-+extern NPY_NO_EXPORT PyTypeObject PyDatetimeArrType_Type;
- 
+-
 -#ifdef NPY_ENABLE_SEPARATE_COMPILATION
 -    extern NPY_NO_EXPORT PyTypeObject PyTimedeltaArrType_Type;
 -#else
 -    NPY_NO_EXPORT PyTypeObject PyTimedeltaArrType_Type;
 -#endif
-+extern NPY_NO_EXPORT PyTypeObject PyTimedeltaArrType_Type;
- 
+-
 -#ifdef NPY_ENABLE_SEPARATE_COMPILATION
 -    extern NPY_NO_EXPORT PyTypeObject PyHalfArrType_Type;
 -#else
 -    NPY_NO_EXPORT PyTypeObject PyHalfArrType_Type;
 -#endif
-+extern NPY_NO_EXPORT PyTypeObject PyHalfArrType_Type;
- 
+-
 -#ifdef NPY_ENABLE_SEPARATE_COMPILATION
 -    extern NPY_NO_EXPORT PyTypeObject NpyIter_Type;
 -#else
 -    NPY_NO_EXPORT PyTypeObject NpyIter_Type;
 -#endif
-+extern NPY_NO_EXPORT PyTypeObject NpyIter_Type;
- 
+-
 -NPY_NO_EXPORT void PyArray_SetDatetimeParseFunction \
 -       (PyObject *);
 -NPY_NO_EXPORT void PyArray_DatetimeToDatetimeStruct \
@@ -885,6 +924,18 @@ index c949d732f..b9e197b9c 100644
 -NPY_NO_EXPORT npy_datetime PyArray_TimedeltaStructToTimedelta \
 -       (NPY_DATETIMEUNIT, npy_timedeltastruct *);
 -NPY_NO_EXPORT NpyIter * NpyIter_New \
++NPY_NO_EXPORT  PyObject* PyArray_NeighborhoodIterNew \
++       (PyArrayIterObject *, const npy_intp *, int, PyArrayObject*);
++extern NPY_NO_EXPORT PyTypeObject PyTimeIntegerArrType_Type;
++
++extern NPY_NO_EXPORT PyTypeObject PyDatetimeArrType_Type;
++
++extern NPY_NO_EXPORT PyTypeObject PyTimedeltaArrType_Type;
++
++extern NPY_NO_EXPORT PyTypeObject PyHalfArrType_Type;
++
++extern NPY_NO_EXPORT PyTypeObject NpyIter_Type;
++
 +NPY_NO_EXPORT  void PyArray_SetDatetimeParseFunction \
 +       (PyObject *NPY_UNUSED(op));
 +NPY_NO_EXPORT  void PyArray_DatetimeToDatetimeStruct \
@@ -1133,7 +1184,7 @@ index c949d732f..b9e197b9c 100644
  
  #else
  
-@@ -923,10 +759,10 @@ static void **PyArray_API=NULL;
+@@ -923,10 +759,10 @@
          (*(PyArray_VectorUnaryFunc * (*)(PyArray_Descr *, int)) \
           PyArray_API[66])
  #define PyArray_FromDims \
@@ -1146,7 +1197,7 @@ index c949d732f..b9e197b9c 100644
           PyArray_API[68])
  #define PyArray_FromAny \
          (*(PyObject * (*)(PyObject *, PyArray_Descr *, int, int, int, PyObject *)) \
-@@ -962,7 +798,7 @@ static void **PyArray_API=NULL;
+@@ -962,7 +798,7 @@
          (*(PyObject * (*)(PyArrayObject *, npy_bool)) \
           PyArray_API[79])
  #define PyArray_Resize \
@@ -1155,7 +1206,7 @@ index c949d732f..b9e197b9c 100644
           PyArray_API[80])
  #define PyArray_MoveInto \
          (*(int (*)(PyArrayObject *, PyArrayObject *)) \
-@@ -1001,10 +837,10 @@ static void **PyArray_API=NULL;
+@@ -1001,10 +837,10 @@
          (*(void (*)(PyArrayObject *, int)) \
           PyArray_API[92])
  #define PyArray_New \
@@ -1168,7 +1219,7 @@ index c949d732f..b9e197b9c 100644
           PyArray_API[94])
  #define PyArray_DescrNew \
          (*(PyArray_Descr * (*)(PyArray_Descr *)) \
-@@ -1019,7 +855,7 @@ static void **PyArray_API=NULL;
+@@ -1019,7 +855,7 @@
          (*(PyObject * (*)(PyObject *)) \
           PyArray_API[98])
  #define PyArray_MultiIterNew \
@@ -1177,7 +1228,7 @@ index c949d732f..b9e197b9c 100644
           PyArray_API[99])
  #define PyArray_PyIntAsInt \
          (*(int (*)(PyObject *)) \
-@@ -1037,7 +873,7 @@ static void **PyArray_API=NULL;
+@@ -1037,7 +873,7 @@
          (*(int (*)(PyArrayObject *, PyObject *)) \
           PyArray_API[104])
  #define PyArray_CheckStrides \
@@ -1186,7 +1237,7 @@ index c949d732f..b9e197b9c 100644
           PyArray_API[105])
  #define PyArray_DescrNewByteorder \
          (*(PyArray_Descr * (*)(PyArray_Descr *, char)) \
-@@ -1073,7 +909,7 @@ static void **PyArray_API=NULL;
+@@ -1073,7 +909,7 @@
          (*(npy_bool (*)(PyTypeObject *, PyTypeObject *)) \
           PyArray_API[116])
  #define PyArray_CompareUCS4 \
@@ -1195,7 +1246,7 @@ index c949d732f..b9e197b9c 100644
           PyArray_API[117])
  #define PyArray_RemoveSmallest \
          (*(int (*)(PyArrayMultiIterObject *)) \
-@@ -1196,25 +1032,25 @@ static void **PyArray_API=NULL;
+@@ -1196,25 +1032,25 @@
          (*(PyObject * (*)(PyArrayObject *, NPY_ORDER)) \
           PyArray_API[157])
  #define PyArray_MultiplyList \
@@ -1227,7 +1278,7 @@ index c949d732f..b9e197b9c 100644
           PyArray_API[164])
  #define PyArray_Free \
          (*(int (*)(PyObject *, void *)) \
-@@ -1271,10 +1107,10 @@ static void **PyArray_API=NULL;
+@@ -1271,10 +1107,10 @@
          (*(unsigned char (*)(PyArray_Descr *, PyArray_Descr *)) \
           PyArray_API[182])
  #define PyArray_Zeros \
@@ -1240,7 +1291,7 @@ index c949d732f..b9e197b9c 100644
           PyArray_API[184])
  #define PyArray_Where \
          (*(PyObject * (*)(PyObject *, PyObject *, PyObject *)) \
-@@ -1310,10 +1146,10 @@ static void **PyArray_API=NULL;
+@@ -1310,10 +1146,10 @@
          (*(void (*)(PyArray_ArrFuncs *)) \
           PyArray_API[195])
  #define PyArray_IntTupleFromIntp \
@@ -1253,7 +1304,7 @@ index c949d732f..b9e197b9c 100644
           PyArray_API[197])
  #define PyArray_ClipmodeConverter \
          (*(int (*)(PyObject *, NPY_CLIPMODE *)) \
-@@ -1343,13 +1179,13 @@ static void **PyArray_API=NULL;
+@@ -1343,13 +1179,13 @@
          (*(PyObject * (*)(PyArrayObject *, int *, int)) \
           PyArray_API[206])
  #define PyArray_OverflowMultiplyList \
@@ -1270,7 +1321,7 @@ index c949d732f..b9e197b9c 100644
           PyArray_API[209])
  #define PyArray_GetEndianness \
          (*(int (*)(void)) \
-@@ -1361,7 +1197,7 @@ static void **PyArray_API=NULL;
+@@ -1361,7 +1197,7 @@
          (*(PyObject * (*)(PyObject *, PyObject *, int)) \
           PyArray_API[212])
  #define PyArray_NeighborhoodIterNew \
@@ -1279,7 +1330,7 @@ index c949d732f..b9e197b9c 100644
           PyArray_API[213])
  #define PyTimeIntegerArrType_Type (*(PyTypeObject *)PyArray_API[214])
  #define PyDatetimeArrType_Type (*(PyTypeObject *)PyArray_API[215])
-@@ -1369,19 +1205,19 @@ static void **PyArray_API=NULL;
+@@ -1369,19 +1205,19 @@
  #define PyHalfArrType_Type (*(PyTypeObject *)PyArray_API[217])
  #define NpyIter_Type (*(PyTypeObject *)PyArray_API[218])
  #define PyArray_SetDatetimeParseFunction \
@@ -1304,7 +1355,7 @@ index c949d732f..b9e197b9c 100644
           PyArray_API[223])
  #define NpyIter_New \
          (*(NpyIter * (*)(PyArrayObject *, npy_uint32, NPY_ORDER, NPY_CASTING, PyArray_Descr*)) \
-@@ -1453,7 +1289,7 @@ static void **PyArray_API=NULL;
+@@ -1453,7 +1289,7 @@
          (*(NpyIter_GetMultiIndexFunc * (*)(NpyIter *, char **)) \
           PyArray_API[246])
  #define NpyIter_GotoMultiIndex \
@@ -1313,7 +1364,7 @@ index c949d732f..b9e197b9c 100644
           PyArray_API[247])
  #define NpyIter_RemoveMultiIndex \
          (*(int (*)(NpyIter *)) \
-@@ -1561,10 +1397,10 @@ static void **PyArray_API=NULL;
+@@ -1561,10 +1397,10 @@
          (*(int (*)(PyArrayObject *, PyObject *)) \
           PyArray_API[282])
  #define PyArray_CreateSortedStridePerm \
@@ -1326,7 +1377,7 @@ index c949d732f..b9e197b9c 100644
           PyArray_API[284])
  #define PyArray_DebugPrint \
          (*(void (*)(PyArrayObject *)) \
-@@ -1588,17 +1424,49 @@ static void **PyArray_API=NULL;
+@@ -1588,17 +1424,49 @@
          (*(PyDataMem_EventHookFunc * (*)(PyDataMem_EventHookFunc *, void *, void **)) \
           PyArray_API[291])
  #define NPY_DEFAULT_ASSIGN_CASTING (*(NPY_CASTING *)PyArray_API[292])
@@ -1378,7 +1429,7 @@ index c949d732f..b9e197b9c 100644
        return -1;
    }
    c_api = PyObject_GetAttrString(numpy, "_ARRAY_API");
-@@ -1608,21 +1476,12 @@ _import_array(void)
+@@ -1608,21 +1476,12 @@
        return -1;
    }
  
@@ -1400,7 +1451,7 @@ index c949d732f..b9e197b9c 100644
    Py_DECREF(c_api);
    if (PyArray_API == NULL) {
        PyErr_SetString(PyExc_RuntimeError, "_ARRAY_API is NULL pointer");
-@@ -1632,13 +1491,13 @@ _import_array(void)
+@@ -1632,13 +1491,13 @@
    /* Perform runtime check of C API version */
    if (NPY_VERSION != PyArray_GetNDArrayCVersion()) {
        PyErr_Format(PyExc_RuntimeError, "module compiled against "\
@@ -1416,7 +1467,7 @@ index c949d732f..b9e197b9c 100644
               (int) NPY_FEATURE_VERSION, (int) PyArray_GetNDArrayCFeatureVersion());
        return -1;
    }
-@@ -1669,13 +1528,7 @@ _import_array(void)
+@@ -1669,13 +1528,7 @@
    return 0;
  }
  
@@ -1431,1009 +1482,2364 @@ index c949d732f..b9e197b9c 100644
  
  #define import_array1(ret) {if (_import_array() < 0) {PyErr_Print(); PyErr_SetString(PyExc_ImportError, "numpy.core.multiarray failed to import"); return ret; } }
  
-diff --git a/include/numpy/__ufunc_api.h b/include/numpy/__ufunc_api.h
-index fd81d07b5..c14bbc837 100644
---- a/include/numpy/__ufunc_api.h
-+++ b/include/numpy/__ufunc_api.h
-@@ -1,98 +1,94 @@
- 
- #ifdef _UMATHMODULE
- 
--#ifdef NPY_ENABLE_SEPARATE_COMPILATION
- extern NPY_NO_EXPORT PyTypeObject PyUFunc_Type;
--#else
--NPY_NO_EXPORT PyTypeObject PyUFunc_Type;
--#endif
- 
--#ifdef NPY_ENABLE_SEPARATE_COMPILATION
--    extern NPY_NO_EXPORT PyTypeObject PyUFunc_Type;
--#else
--    NPY_NO_EXPORT PyTypeObject PyUFunc_Type;
--#endif
-+extern NPY_NO_EXPORT PyTypeObject PyUFunc_Type;
- 
--NPY_NO_EXPORT PyObject * PyUFunc_FromFuncAndData \
--       (PyUFuncGenericFunction *, void **, char *, int, int, int, int, char *, char *, int);
--NPY_NO_EXPORT int PyUFunc_RegisterLoopForType \
--       (PyUFuncObject *, int, PyUFuncGenericFunction, int *, void *);
--NPY_NO_EXPORT int PyUFunc_GenericFunction \
-+NPY_NO_EXPORT  PyObject * PyUFunc_FromFuncAndData \
-+       (PyUFuncGenericFunction *, void **, char *, int, int, int, int, const char *, const char *, int);
-+NPY_NO_EXPORT  int PyUFunc_RegisterLoopForType \
-+       (PyUFuncObject *, int, PyUFuncGenericFunction, const int *, void *);
-+NPY_NO_EXPORT  int PyUFunc_GenericFunction \
-        (PyUFuncObject *, PyObject *, PyObject *, PyArrayObject **);
--NPY_NO_EXPORT void PyUFunc_f_f_As_d_d \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_d_d \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_f_f \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_g_g \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_F_F_As_D_D \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_F_F \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_D_D \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_G_G \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_O_O \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_ff_f_As_dd_d \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_ff_f \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_dd_d \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_gg_g \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_FF_F_As_DD_D \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_DD_D \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_FF_F \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_GG_G \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_OO_O \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_O_O_method \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_OO_O_method \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_On_Om \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT int PyUFunc_GetPyValues \
-+NPY_NO_EXPORT  void PyUFunc_f_f_As_d_d \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_d_d \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_f_f \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_g_g \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_F_F_As_D_D \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_F_F \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_D_D \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_G_G \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_O_O \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_ff_f_As_dd_d \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_ff_f \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_dd_d \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_gg_g \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_FF_F_As_DD_D \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_DD_D \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_FF_F \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_GG_G \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_OO_O \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_O_O_method \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_OO_O_method \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_On_Om \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  int PyUFunc_GetPyValues \
-        (char *, int *, int *, PyObject **);
--NPY_NO_EXPORT int PyUFunc_checkfperr \
-+NPY_NO_EXPORT  int PyUFunc_checkfperr \
-        (int, PyObject *, int *);
--NPY_NO_EXPORT void PyUFunc_clearfperr \
-+NPY_NO_EXPORT  void PyUFunc_clearfperr \
-        (void);
--NPY_NO_EXPORT int PyUFunc_getfperr \
-+NPY_NO_EXPORT  int PyUFunc_getfperr \
-        (void);
--NPY_NO_EXPORT int PyUFunc_handlefperr \
-+NPY_NO_EXPORT  int PyUFunc_handlefperr \
-        (int, PyObject *, int, int *);
--NPY_NO_EXPORT int PyUFunc_ReplaceLoopBySignature \
--       (PyUFuncObject *, PyUFuncGenericFunction, int *, PyUFuncGenericFunction *);
--NPY_NO_EXPORT PyObject * PyUFunc_FromFuncAndDataAndSignature \
--       (PyUFuncGenericFunction *, void **, char *, int, int, int, int, char *, char *, int, const char *);
--NPY_NO_EXPORT int PyUFunc_SetUsesArraysAsData \
-+NPY_NO_EXPORT  int PyUFunc_ReplaceLoopBySignature \
-+       (PyUFuncObject *, PyUFuncGenericFunction, const int *, PyUFuncGenericFunction *);
-+NPY_NO_EXPORT  PyObject * PyUFunc_FromFuncAndDataAndSignature \
-+       (PyUFuncGenericFunction *, void **, char *, int, int, int, int, const char *, const char *, int, const char *);
-+NPY_NO_EXPORT  int PyUFunc_SetUsesArraysAsData \
-        (void **, size_t);
--NPY_NO_EXPORT void PyUFunc_e_e \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_e_e_As_f_f \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_e_e_As_d_d \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_ee_e \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_ee_e_As_ff_f \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT void PyUFunc_ee_e_As_dd_d \
--       (char **, npy_intp *, npy_intp *, void *);
--NPY_NO_EXPORT int PyUFunc_DefaultTypeResolver \
-+NPY_NO_EXPORT  void PyUFunc_e_e \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_e_e_As_f_f \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_e_e_As_d_d \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_ee_e \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_ee_e_As_ff_f \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  void PyUFunc_ee_e_As_dd_d \
-+       (char **, npy_intp const *, npy_intp const *, void *);
-+NPY_NO_EXPORT  int PyUFunc_DefaultTypeResolver \
-        (PyUFuncObject *, NPY_CASTING, PyArrayObject **, PyObject *, PyArray_Descr **);
--NPY_NO_EXPORT int PyUFunc_ValidateCasting \
-+NPY_NO_EXPORT  int PyUFunc_ValidateCasting \
-        (PyUFuncObject *, NPY_CASTING, PyArrayObject **, PyArray_Descr **);
-+NPY_NO_EXPORT  int PyUFunc_RegisterLoopForDescr \
-+       (PyUFuncObject *, PyArray_Descr *, PyUFuncGenericFunction, PyArray_Descr **, void *);
-+NPY_NO_EXPORT  PyObject * PyUFunc_FromFuncAndDataAndSignatureAndIdentity \
-+       (PyUFuncGenericFunction *, void **, char *, int, int, int, int, const char *, const char *, const int, const char *, PyObject *);
- 
- #else
- 
-@@ -112,76 +108,76 @@ static void **PyUFunc_API=NULL;
- 
- #define PyUFunc_Type (*(PyTypeObject *)PyUFunc_API[0])
- #define PyUFunc_FromFuncAndData \
--        (*(PyObject * (*)(PyUFuncGenericFunction *, void **, char *, int, int, int, int, char *, char *, int)) \
-+        (*(PyObject * (*)(PyUFuncGenericFunction *, void **, char *, int, int, int, int, const char *, const char *, int)) \
-          PyUFunc_API[1])
- #define PyUFunc_RegisterLoopForType \
--        (*(int (*)(PyUFuncObject *, int, PyUFuncGenericFunction, int *, void *)) \
-+        (*(int (*)(PyUFuncObject *, int, PyUFuncGenericFunction, const int *, void *)) \
-          PyUFunc_API[2])
- #define PyUFunc_GenericFunction \
-         (*(int (*)(PyUFuncObject *, PyObject *, PyObject *, PyArrayObject **)) \
-          PyUFunc_API[3])
- #define PyUFunc_f_f_As_d_d \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[4])
- #define PyUFunc_d_d \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[5])
- #define PyUFunc_f_f \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[6])
- #define PyUFunc_g_g \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[7])
- #define PyUFunc_F_F_As_D_D \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[8])
- #define PyUFunc_F_F \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[9])
- #define PyUFunc_D_D \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[10])
- #define PyUFunc_G_G \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[11])
- #define PyUFunc_O_O \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[12])
- #define PyUFunc_ff_f_As_dd_d \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[13])
- #define PyUFunc_ff_f \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[14])
- #define PyUFunc_dd_d \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[15])
- #define PyUFunc_gg_g \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[16])
- #define PyUFunc_FF_F_As_DD_D \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[17])
- #define PyUFunc_DD_D \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[18])
- #define PyUFunc_FF_F \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[19])
- #define PyUFunc_GG_G \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[20])
- #define PyUFunc_OO_O \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[21])
- #define PyUFunc_O_O_method \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[22])
- #define PyUFunc_OO_O_method \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[23])
- #define PyUFunc_On_Om \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[24])
- #define PyUFunc_GetPyValues \
-         (*(int (*)(char *, int *, int *, PyObject **)) \
-@@ -199,31 +195,31 @@ static void **PyUFunc_API=NULL;
-         (*(int (*)(int, PyObject *, int, int *)) \
-          PyUFunc_API[29])
- #define PyUFunc_ReplaceLoopBySignature \
--        (*(int (*)(PyUFuncObject *, PyUFuncGenericFunction, int *, PyUFuncGenericFunction *)) \
-+        (*(int (*)(PyUFuncObject *, PyUFuncGenericFunction, const int *, PyUFuncGenericFunction *)) \
-          PyUFunc_API[30])
- #define PyUFunc_FromFuncAndDataAndSignature \
--        (*(PyObject * (*)(PyUFuncGenericFunction *, void **, char *, int, int, int, int, char *, char *, int, const char *)) \
-+        (*(PyObject * (*)(PyUFuncGenericFunction *, void **, char *, int, int, int, int, const char *, const char *, int, const char *)) \
-          PyUFunc_API[31])
- #define PyUFunc_SetUsesArraysAsData \
-         (*(int (*)(void **, size_t)) \
-          PyUFunc_API[32])
- #define PyUFunc_e_e \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[33])
- #define PyUFunc_e_e_As_f_f \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[34])
- #define PyUFunc_e_e_As_d_d \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[35])
- #define PyUFunc_ee_e \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[36])
- #define PyUFunc_ee_e_As_ff_f \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[37])
- #define PyUFunc_ee_e_As_dd_d \
--        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
-+        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
-          PyUFunc_API[38])
- #define PyUFunc_DefaultTypeResolver \
-         (*(int (*)(PyUFuncObject *, NPY_CASTING, PyArrayObject **, PyObject *, PyArray_Descr **)) \
-@@ -231,15 +227,22 @@ static void **PyUFunc_API=NULL;
- #define PyUFunc_ValidateCasting \
-         (*(int (*)(PyUFuncObject *, NPY_CASTING, PyArrayObject **, PyArray_Descr **)) \
-          PyUFunc_API[40])
-+#define PyUFunc_RegisterLoopForDescr \
-+        (*(int (*)(PyUFuncObject *, PyArray_Descr *, PyUFuncGenericFunction, PyArray_Descr **, void *)) \
-+         PyUFunc_API[41])
-+#define PyUFunc_FromFuncAndDataAndSignatureAndIdentity \
-+        (*(PyObject * (*)(PyUFuncGenericFunction *, void **, char *, int, int, int, int, const char *, const char *, const int, const char *, PyObject *)) \
-+         PyUFunc_API[42])
- 
--static int
-+static NPY_INLINE int
- _import_umath(void)
- {
--  PyObject *numpy = PyImport_ImportModule("numpy.core.umath");
-+  PyObject *numpy = PyImport_ImportModule("numpy.core._multiarray_umath");
-   PyObject *c_api = NULL;
- 
-   if (numpy == NULL) {
--      PyErr_SetString(PyExc_ImportError, "numpy.core.umath failed to import");
-+      PyErr_SetString(PyExc_ImportError,
-+                      "numpy.core._multiarray_umath failed to import");
-       return -1;
-   }
-   c_api = PyObject_GetAttrString(numpy, "_UFUNC_API");
-@@ -249,21 +252,12 @@ _import_umath(void)
-       return -1;
-   }
- 
--#if PY_VERSION_HEX >= 0x03000000
-   if (!PyCapsule_CheckExact(c_api)) {
-       PyErr_SetString(PyExc_RuntimeError, "_UFUNC_API is not PyCapsule object");
-       Py_DECREF(c_api);
-       return -1;
-   }
-   PyUFunc_API = (void **)PyCapsule_GetPointer(c_api, NULL);
--#else
--  if (!PyCObject_Check(c_api)) {
--      PyErr_SetString(PyExc_RuntimeError, "_UFUNC_API is not PyCObject object");
--      Py_DECREF(c_api);
--      return -1;
--  }
--  PyUFunc_API = (void **)PyCObject_AsVoidPtr(c_api);
--#endif
-   Py_DECREF(c_api);
-   if (PyUFunc_API == NULL) {
-       PyErr_SetString(PyExc_RuntimeError, "_UFUNC_API is NULL pointer");
-@@ -272,12 +266,6 @@ _import_umath(void)
-   return 0;
- }
- 
--#if PY_VERSION_HEX >= 0x03000000
--#define NUMPY_IMPORT_UMATH_RETVAL NULL
--#else
--#define NUMPY_IMPORT_UMATH_RETVAL
--#endif
--
- #define import_umath() \
-     do {\
-         UFUNC_NOFPE\
-@@ -285,7 +273,7 @@ _import_umath(void)
-             PyErr_Print();\
-             PyErr_SetString(PyExc_ImportError,\
-                     "numpy.core.umath failed to import");\
--            return NUMPY_IMPORT_UMATH_RETVAL;\
-+            return NULL;\
-         }\
-     } while(0)
- 
-diff --git a/include/numpy/_numpyconfig.h b/include/numpy/_numpyconfig.h
-index d55ffc38d..edb7e3797 100644
---- a/include/numpy/_numpyconfig.h
-+++ b/include/numpy/_numpyconfig.h
-@@ -1,3 +1,4 @@
-+#define NPY_HAVE_ENDIAN_H 1
- #define NPY_SIZEOF_SHORT SIZEOF_SHORT
- #define NPY_SIZEOF_INT SIZEOF_INT
- #define NPY_SIZEOF_LONG SIZEOF_LONG
-@@ -8,6 +9,7 @@
- #define NPY_SIZEOF_LONGDOUBLE 16
- #define NPY_SIZEOF_COMPLEX_LONGDOUBLE 32
- #define NPY_SIZEOF_PY_INTPTR_T 8
-+#define NPY_SIZEOF_OFF_T 8
- #define NPY_SIZEOF_PY_LONG_LONG 8
- #define NPY_SIZEOF_LONGLONG 8
- #define NPY_NO_SMP 0
-@@ -19,10 +21,11 @@
- #define NPY_HAVE_COMPLEX_DOUBLE 1
- #define NPY_HAVE_COMPLEX_FLOAT 1
- #define NPY_HAVE_COMPLEX_LONG_DOUBLE 1
-+#define NPY_RELAXED_STRIDES_CHECKING 1
- #define NPY_USE_C99_FORMATS 1
- #define NPY_VISIBILITY_HIDDEN __attribute__((visibility("hidden")))
- #define NPY_ABI_VERSION 0x01000009
--#define NPY_API_VERSION 0x00000007
-+#define NPY_API_VERSION 0x0000000D
- 
- #ifndef __STDC_FORMAT_MACROS
- #define __STDC_FORMAT_MACROS 1
-diff --git a/include/numpy/arrayobject.h b/include/numpy/arrayobject.h
-index a84766f63..4f46d6b1a 100644
---- a/include/numpy/arrayobject.h
-+++ b/include/numpy/arrayobject.h
-@@ -1,14 +1,3 @@
--
--/* This expects the following variables to be defined (besides
--   the usual ones from pyconfig.h
--
--   SIZEOF_LONG_DOUBLE -- sizeof(long double) or sizeof(double) if no
--                         long double is present on platform.
--   CHAR_BIT       --     number of bits in a char (usually 8)
--                         (should be in limits.h)
--
--*/
--
- #ifndef Py_ARRAYOBJECT_H
- #define Py_ARRAYOBJECT_H
- 
-diff --git a/include/numpy/arrayscalars.h b/include/numpy/arrayscalars.h
-index 64450e713..42a0df76a 100644
---- a/include/numpy/arrayscalars.h
-+++ b/include/numpy/arrayscalars.h
-@@ -135,7 +135,13 @@ typedef struct {
- } PyScalarObject;
- 
- #define PyStringScalarObject PyStringObject
--#define PyUnicodeScalarObject PyUnicodeObject
-+#define PyStringScalarObject PyStringObject
-+typedef struct {
-+        /* note that the PyObject_HEAD macro lives right here */
-+        PyUnicodeObject base;
-+        Py_UCS4 *obval;
-+} PyUnicodeScalarObject;
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/multiarray_api.txt spacy-2.3.2/include/numpy/multiarray_api.txt
+--- spacy-2.3.2-orig/include/numpy/multiarray_api.txt	1970-01-01 01:00:00.000000000 +0100
++++ spacy-2.3.2/include/numpy/multiarray_api.txt	2020-11-11 13:37:37.422412633 +0100
+@@ -0,0 +1,2459 @@
 +
- 
- typedef struct {
-         PyObject_VAR_HEAD
-diff --git a/include/numpy/halffloat.h b/include/numpy/halffloat.h
-index 944f0ea34..ab0d221fb 100644
---- a/include/numpy/halffloat.h
-+++ b/include/numpy/halffloat.h
-@@ -37,6 +37,7 @@ int npy_half_signbit(npy_half h);
- npy_half npy_half_copysign(npy_half x, npy_half y);
- npy_half npy_half_spacing(npy_half h);
- npy_half npy_half_nextafter(npy_half x, npy_half y);
-+npy_half npy_half_divmod(npy_half x, npy_half y, npy_half *modulus);
- 
- /*
-  * Half-precision constants
-diff --git a/include/numpy/multiarray_api.txt b/include/numpy/multiarray_api.txt
-index 7e588f067..3a3268f27 100644
---- a/include/numpy/multiarray_api.txt
-+++ b/include/numpy/multiarray_api.txt
-@@ -1,6 +1,6 @@
- 
- ===========
--Numpy C-API
++===========
 +NumPy C-API
- ===========
- ::
- 
-@@ -85,7 +85,7 @@ Get pointer to one of correct type for array
- For backward compatibility
- 
- Cast an array using typecode structure.
--steals reference to at --- cannot be NULL
++===========
++::
++
++  unsigned int
++  PyArray_GetNDArrayCVersion(void )
++
++
++Included at the very first so not auto-grabbed and thus not labeled.
++
++::
++
++  int
++  PyArray_SetNumericOps(PyObject *dict)
++
++Set internal structure with number functions that all arrays will use
++
++::
++
++  PyObject *
++  PyArray_GetNumericOps(void )
++
++Get dictionary showing number functions that all arrays will use
++
++::
++
++  int
++  PyArray_INCREF(PyArrayObject *mp)
++
++For object arrays, increment all internal references.
++
++::
++
++  int
++  PyArray_XDECREF(PyArrayObject *mp)
++
++Decrement all internal references for object arrays.
++(or arrays with object fields)
++
++::
++
++  void
++  PyArray_SetStringFunction(PyObject *op, int repr)
++
++Set the array print function to be a Python function.
++
++::
++
++  PyArray_Descr *
++  PyArray_DescrFromType(int type)
++
++Get the PyArray_Descr structure for a type.
++
++::
++
++  PyObject *
++  PyArray_TypeObjectFromType(int type)
++
++Get a typeobject from a type-number -- can return NULL.
++
++New reference
++
++::
++
++  char *
++  PyArray_Zero(PyArrayObject *arr)
++
++Get pointer to zero of correct type for array.
++
++::
++
++  char *
++  PyArray_One(PyArrayObject *arr)
++
++Get pointer to one of correct type for array
++
++::
++
++  PyObject *
++  PyArray_CastToType(PyArrayObject *arr, PyArray_Descr *dtype, int
++                     is_f_order)
++
++For backward compatibility
++
++Cast an array using typecode structure.
 +steals reference to dtype --- cannot be NULL
- 
- This function always makes a copy of arr, even if the dtype
- doesn't change.
-@@ -144,6 +144,11 @@ new reference -- accepts NULL for mintype
-   PyArray_ConvertToCommonType(PyObject *op, int *retn)
- 
- 
++
++This function always makes a copy of arr, even if the dtype
++doesn't change.
++
++::
++
++  int
++  PyArray_CastTo(PyArrayObject *out, PyArrayObject *mp)
++
++Cast to an already created array.
++
++::
++
++  int
++  PyArray_CastAnyTo(PyArrayObject *out, PyArrayObject *mp)
++
++Cast to an already created array.  Arrays don't have to be "broadcastable"
++Only requirement is they have the same number of elements.
++
++::
++
++  int
++  PyArray_CanCastSafely(int fromtype, int totype)
++
++Check the type coercion rules.
++
++::
++
++  npy_bool
++  PyArray_CanCastTo(PyArray_Descr *from, PyArray_Descr *to)
++
++leaves reference count alone --- cannot be NULL
++
++PyArray_CanCastTypeTo is equivalent to this, but adds a 'casting'
++parameter.
++
++::
++
++  int
++  PyArray_ObjectType(PyObject *op, int minimum_type)
++
++Return the typecode of the array a Python object would be converted to
++
++Returns the type number the result should have, or NPY_NOTYPE on error.
++
++::
++
++  PyArray_Descr *
++  PyArray_DescrFromObject(PyObject *op, PyArray_Descr *mintype)
++
++new reference -- accepts NULL for mintype
++
++::
++
++  PyArrayObject **
++  PyArray_ConvertToCommonType(PyObject *op, int *retn)
++
++
 +This function is only used in one place within NumPy and should
 +generally be avoided. It is provided mainly for backward compatibility.
 +
 +The user of the function has to free the returned array.
 +
- ::
- 
-   PyArray_Descr *
-@@ -242,18 +247,19 @@ Returns NULL if un-successful.
- ::
- 
-   PyObject *
--  PyArray_FromDims(int nd, int *d, int type)
++::
++
++  PyArray_Descr *
++  PyArray_DescrFromScalar(PyObject *sc)
++
++Return descr object from array scalar.
++
++New reference
++
++::
++
++  PyArray_Descr *
++  PyArray_DescrFromTypeObject(PyObject *type)
++
++
++::
++
++  npy_intp
++  PyArray_Size(PyObject *op)
++
++Compute the size of an array (in number of items)
++
++::
++
++  PyObject *
++  PyArray_Scalar(void *data, PyArray_Descr *descr, PyObject *base)
++
++Get scalar-equivalent to a region of memory described by a descriptor.
++
++::
++
++  PyObject *
++  PyArray_FromScalar(PyObject *scalar, PyArray_Descr *outcode)
++
++Get 0-dim array from scalar
++
++0-dim array from array-scalar object
++always contains a copy of the data
++unless outcode is NULL, it is of void type and the referrer does
++not own it either.
++
++steals reference to outcode
++
++::
++
++  void
++  PyArray_ScalarAsCtype(PyObject *scalar, void *ctypeptr)
++
++Convert to c-type
++
++no error checking is performed -- ctypeptr must be same type as scalar
++in case of flexible type, the data is not copied
++into ctypeptr which is expected to be a pointer to pointer
++
++::
++
++  int
++  PyArray_CastScalarToCtype(PyObject *scalar, void
++                            *ctypeptr, PyArray_Descr *outcode)
++
++Cast Scalar to c-type
++
++The output buffer must be large-enough to receive the value
++Even for flexible types which is different from ScalarAsCtype
++where only a reference for flexible types is returned
++
++This may not work right on narrow builds for NumPy unicode scalars.
++
++::
++
++  int
++  PyArray_CastScalarDirect(PyObject *scalar, PyArray_Descr
++                           *indescr, void *ctypeptr, int outtype)
++
++Cast Scalar to c-type
++
++::
++
++  PyObject *
++  PyArray_ScalarFromObject(PyObject *object)
++
++Get an Array Scalar From a Python Object
++
++Returns NULL if unsuccessful but error is only set if another error occurred.
++Currently only Numeric-like object supported.
++
++::
++
++  PyArray_VectorUnaryFunc *
++  PyArray_GetCastFunc(PyArray_Descr *descr, int type_num)
++
++Get a cast function to cast from the input descriptor to the
++output type_number (must be a registered data-type).
++Returns NULL if un-successful.
++
++::
++
++  PyObject *
 +  PyArray_FromDims(int NPY_UNUSED(nd) , int *NPY_UNUSED(d) , int
 +                   NPY_UNUSED(type) )
- 
--Construct an empty array from dimensions and typenum
++
 +Deprecated, use PyArray_SimpleNew instead.
- 
- ::
- 
-   PyObject *
--  PyArray_FromDimsAndDataAndDescr(int nd, int *d, PyArray_Descr
--                                  *descr, char *data)
++
++::
++
++  PyObject *
 +  PyArray_FromDimsAndDataAndDescr(int NPY_UNUSED(nd) , int
 +                                  *NPY_UNUSED(d) , PyArray_Descr
 +                                  *descr, char *NPY_UNUSED(data) )
- 
--Like FromDimsAndData but uses the Descr structure instead of typecode
--as input.
++
 +Deprecated, use PyArray_NewFromDescr instead.
- 
- ::
- 
-@@ -270,7 +276,8 @@ Steals a reference to newtype --- which can be NULL
-   PyObject *
-   PyArray_EnsureArray(PyObject *op)
- 
--This is a quick wrapper around PyArray_FromAny(op, NULL, 0, 0, ENSUREARRAY)
++
++::
++
++  PyObject *
++  PyArray_FromAny(PyObject *op, PyArray_Descr *newtype, int
++                  min_depth, int max_depth, int flags, PyObject
++                  *context)
++
++Does not check for NPY_ARRAY_ENSURECOPY and NPY_ARRAY_NOTSWAPPED in flags
++Steals a reference to newtype --- which can be NULL
++
++::
++
++  PyObject *
++  PyArray_EnsureArray(PyObject *op)
++
 +This is a quick wrapper around
 +PyArray_FromAny(op, NULL, 0, 0, NPY_ARRAY_ENSUREARRAY, NULL)
- that special cases Arrays and PyArray_Scalars up front
- It *steals a reference* to the object
- It also guarantees that the result is PyArray_Type
-@@ -293,8 +300,8 @@ so it can be used like PyArray_EnsureArray(some_function(...))
- Given a ``FILE *`` pointer ``fp``, and a ``PyArray_Descr``, return an
- array corresponding to the data encoded in that file.
- 
--If the dtype is NULL, the default array type is used (double).
--If non-null, the reference is stolen.
++that special cases Arrays and PyArray_Scalars up front
++It *steals a reference* to the object
++It also guarantees that the result is PyArray_Type
++Because it decrefs op if any conversion needs to take place
++so it can be used like PyArray_EnsureArray(some_function(...))
++
++::
++
++  PyObject *
++  PyArray_EnsureAnyArray(PyObject *op)
++
++
++::
++
++  PyObject *
++  PyArray_FromFile(FILE *fp, PyArray_Descr *dtype, npy_intp num, char
++                   *sep)
++
++
++Given a ``FILE *`` pointer ``fp``, and a ``PyArray_Descr``, return an
++array corresponding to the data encoded in that file.
++
 +The reference to `dtype` is stolen (it is possible that the passed in
 +dtype is not held on to).
- 
- The number of elements to read is given as ``num``; if it is < 0, then
- then as many as possible are read.
-@@ -356,6 +363,7 @@ steals a reference to dtype (which cannot be NULL)
- 
- Return either an array or the appropriate Python object if the array
- is 0d and matches a Python type.
++
++The number of elements to read is given as ``num``; if it is < 0, then
++then as many as possible are read.
++
++If ``sep`` is NULL or empty, then binary data is assumed, else
++text data, with ``sep`` as the separator between elements. Whitespace in
++the separator matches any length of whitespace in the text, and a match
++for whitespace around the separator is added.
++
++For memory-mapped files, use the buffer interface. No more data than
++necessary is read by this routine.
++
++::
++
++  PyObject *
++  PyArray_FromString(char *data, npy_intp slen, PyArray_Descr
++                     *dtype, npy_intp num, char *sep)
++
++
++Given a pointer to a string ``data``, a string length ``slen``, and
++a ``PyArray_Descr``, return an array corresponding to the data
++encoded in that string.
++
++If the dtype is NULL, the default array type is used (double).
++If non-null, the reference is stolen.
++
++If ``slen`` is < 0, then the end of string is used for text data.
++It is an error for ``slen`` to be < 0 for binary data (since embedded NULLs
++would be the norm).
++
++The number of elements to read is given as ``num``; if it is < 0, then
++then as many as possible are read.
++
++If ``sep`` is NULL or empty, then binary data is assumed, else
++text data, with ``sep`` as the separator between elements. Whitespace in
++the separator matches any length of whitespace in the text, and a match
++for whitespace around the separator is added.
++
++::
++
++  PyObject *
++  PyArray_FromBuffer(PyObject *buf, PyArray_Descr *type, npy_intp
++                     count, npy_intp offset)
++
++
++::
++
++  PyObject *
++  PyArray_FromIter(PyObject *obj, PyArray_Descr *dtype, npy_intp count)
++
++
++steals a reference to dtype (which cannot be NULL)
++
++::
++
++  PyObject *
++  PyArray_Return(PyArrayObject *mp)
++
++
++Return either an array or the appropriate Python object if the array
++is 0d and matches a Python type.
 +steals reference to mp
- 
- ::
- 
-@@ -364,6 +372,7 @@ is 0d and matches a Python type.
-                    offset)
- 
- Get a subset of bytes from each element of the array
++
++::
++
++  PyObject *
++  PyArray_GetField(PyArrayObject *self, PyArray_Descr *typed, int
++                   offset)
++
++Get a subset of bytes from each element of the array
 +steals reference to typed, must not be NULL
- 
- ::
- 
-@@ -372,6 +381,7 @@ Get a subset of bytes from each element of the array
-                    offset, PyObject *val)
- 
- Set a subset of bytes from each element of the array
++
++::
++
++  int
++  PyArray_SetField(PyArrayObject *self, PyArray_Descr *dtype, int
++                   offset, PyObject *val)
++
++Set a subset of bytes from each element of the array
 +steals reference to dtype, must not be NULL
- 
- ::
- 
-@@ -383,7 +393,7 @@ Set a subset of bytes from each element of the array
- 
-   PyObject *
-   PyArray_Resize(PyArrayObject *self, PyArray_Dims *newshape, int
--                 refcheck, NPY_ORDER order)
++
++::
++
++  PyObject *
++  PyArray_Byteswap(PyArrayObject *self, npy_bool inplace)
++
++
++::
++
++  PyObject *
++  PyArray_Resize(PyArrayObject *self, PyArray_Dims *newshape, int
 +                 refcheck, NPY_ORDER NPY_UNUSED(order) )
- 
- Resize (reallocate data).  Only works if nothing else is referencing this
- array and it is contiguous.  If refcheck is 0, then the reference count is
-@@ -486,9 +496,9 @@ Update Several Flags at once.
- ::
- 
-   PyObject *
--  PyArray_New(PyTypeObject *subtype, int nd, npy_intp *dims, int
--              type_num, npy_intp *strides, void *data, int itemsize, int
--              flags, PyObject *obj)
++
++Resize (reallocate data).  Only works if nothing else is referencing this
++array and it is contiguous.  If refcheck is 0, then the reference count is
++not checked and assumed to be 1.  You still must own this data and have no
++weak-references and no base object.
++
++::
++
++  int
++  PyArray_MoveInto(PyArrayObject *dst, PyArrayObject *src)
++
++Move the memory of one array into another, allowing for overlapping data.
++
++Returns 0 on success, negative on failure.
++
++::
++
++  int
++  PyArray_CopyInto(PyArrayObject *dst, PyArrayObject *src)
++
++Copy an Array into another array.
++Broadcast to the destination shape if necessary.
++
++Returns 0 on success, -1 on failure.
++
++::
++
++  int
++  PyArray_CopyAnyInto(PyArrayObject *dst, PyArrayObject *src)
++
++Copy an Array into another array -- memory must not overlap
++Does not require src and dest to have "broadcastable" shapes
++(only the same number of elements).
++
++TODO: For NumPy 2.0, this could accept an order parameter which
++only allows NPY_CORDER and NPY_FORDER.  Could also rename
++this to CopyAsFlat to make the name more intuitive.
++
++Returns 0 on success, -1 on error.
++
++::
++
++  int
++  PyArray_CopyObject(PyArrayObject *dest, PyObject *src_object)
++
++
++::
++
++  PyObject *
++  PyArray_NewCopy(PyArrayObject *obj, NPY_ORDER order)
++
++Copy an array.
++
++::
++
++  PyObject *
++  PyArray_ToList(PyArrayObject *self)
++
++To List
++
++::
++
++  PyObject *
++  PyArray_ToString(PyArrayObject *self, NPY_ORDER order)
++
++
++::
++
++  int
++  PyArray_ToFile(PyArrayObject *self, FILE *fp, char *sep, char *format)
++
++To File
++
++::
++
++  int
++  PyArray_Dump(PyObject *self, PyObject *file, int protocol)
++
++
++::
++
++  PyObject *
++  PyArray_Dumps(PyObject *self, int protocol)
++
++
++::
++
++  int
++  PyArray_ValidType(int type)
++
++Is the typenum valid?
++
++::
++
++  void
++  PyArray_UpdateFlags(PyArrayObject *ret, int flagmask)
++
++Update Several Flags at once.
++
++::
++
++  PyObject *
 +  PyArray_New(PyTypeObject *subtype, int nd, npy_intp const *dims, int
 +              type_num, npy_intp const *strides, void *data, int
 +              itemsize, int flags, PyObject *obj)
- 
- Generic new array creation routine.
- 
-@@ -496,12 +506,13 @@ Generic new array creation routine.
- 
-   PyObject *
-   PyArray_NewFromDescr(PyTypeObject *subtype, PyArray_Descr *descr, int
--                       nd, npy_intp *dims, npy_intp *strides, void
--                       *data, int flags, PyObject *obj)
++
++Generic new array creation routine.
++
++::
++
++  PyObject *
++  PyArray_NewFromDescr(PyTypeObject *subtype, PyArray_Descr *descr, int
 +                       nd, npy_intp const *dims, npy_intp const
 +                       *strides, void *data, int flags, PyObject *obj)
- 
- Generic new array creation routine.
- 
--steals a reference to descr (even on failure)
++
++Generic new array creation routine.
++
 +steals a reference to descr. On failure or when dtype->subarray is
 +true, dtype will be decrefed.
- 
- ::
- 
-@@ -532,7 +543,7 @@ Get Iterator.
- 
- ::
- 
--  PyObject *
++
++::
++
++  PyArray_Descr *
++  PyArray_DescrNew(PyArray_Descr *base)
++
++base cannot be NULL
++
++::
++
++  PyArray_Descr *
++  PyArray_DescrNewFromType(int type_num)
++
++
++::
++
++  double
++  PyArray_GetPriority(PyObject *obj, double default_)
++
++Get Priority from object
++
++::
++
++  PyObject *
++  PyArray_IterNew(PyObject *obj)
++
++Get Iterator.
++
++::
++
 +  PyObject*
-   PyArray_MultiIterNew(int n, ... )
- 
- Get MultiIterator,
-@@ -572,7 +583,8 @@ Assumes contiguous
- 
-   npy_bool
-   PyArray_CheckStrides(int elsize, int nd, npy_intp numbytes, npy_intp
--                       offset, npy_intp *dims, npy_intp *newstrides)
++  PyArray_MultiIterNew(int n, ... )
++
++Get MultiIterator,
++
++::
++
++  int
++  PyArray_PyIntAsInt(PyObject *o)
++
++
++::
++
++  npy_intp
++  PyArray_PyIntAsIntp(PyObject *o)
++
++
++::
++
++  int
++  PyArray_Broadcast(PyArrayMultiIterObject *mit)
++
++
++::
++
++  void
++  PyArray_FillObjectArray(PyArrayObject *arr, PyObject *obj)
++
++Assumes contiguous
++
++::
++
++  int
++  PyArray_FillWithScalar(PyArrayObject *arr, PyObject *obj)
++
++
++::
++
++  npy_bool
++  PyArray_CheckStrides(int elsize, int nd, npy_intp numbytes, npy_intp
 +                       offset, npy_intp const *dims, npy_intp const
 +                       *newstrides)
- 
- 
- ::
-@@ -686,7 +698,8 @@ TODO: For NumPy 2.0, add a NPY_CASTING parameter.
- ::
- 
-   int
--  PyArray_CompareUCS4(npy_ucs4 *s1, npy_ucs4 *s2, size_t len)
++
++
++::
++
++  PyArray_Descr *
++  PyArray_DescrNewByteorder(PyArray_Descr *self, char newendian)
++
++
++returns a copy of the PyArray_Descr structure with the byteorder
++altered:
++no arguments:  The byteorder is swapped (in all subfields as well)
++single argument:  The byteorder is forced to the given state
++(in all subfields as well)
++
++Valid states:  ('big', '>') or ('little' or '<')
++('native', or '=')
++
++If a descr structure with | is encountered it's own
++byte-order is not changed but any fields are:
++
++
++Deep bytorder change of a data-type descriptor
++Leaves reference count of self unchanged --- does not DECREF self ***
++
++::
++
++  PyObject *
++  PyArray_IterAllButAxis(PyObject *obj, int *inaxis)
++
++Get Iterator that iterates over all but one axis (don't use this with
++PyArray_ITER_GOTO1D).  The axis will be over-written if negative
++with the axis having the smallest stride.
++
++::
++
++  PyObject *
++  PyArray_CheckFromAny(PyObject *op, PyArray_Descr *descr, int
++                       min_depth, int max_depth, int requires, PyObject
++                       *context)
++
++steals a reference to descr -- accepts NULL
++
++::
++
++  PyObject *
++  PyArray_FromArray(PyArrayObject *arr, PyArray_Descr *newtype, int
++                    flags)
++
++steals reference to newtype --- acc. NULL
++
++::
++
++  PyObject *
++  PyArray_FromInterface(PyObject *origin)
++
++
++::
++
++  PyObject *
++  PyArray_FromStructInterface(PyObject *input)
++
++
++::
++
++  PyObject *
++  PyArray_FromArrayAttr(PyObject *op, PyArray_Descr *typecode, PyObject
++                        *context)
++
++
++::
++
++  NPY_SCALARKIND
++  PyArray_ScalarKind(int typenum, PyArrayObject **arr)
++
++ScalarKind
++
++Returns the scalar kind of a type number, with an
++optional tweak based on the scalar value itself.
++If no scalar is provided, it returns INTPOS_SCALAR
++for both signed and unsigned integers, otherwise
++it checks the sign of any signed integer to choose
++INTNEG_SCALAR when appropriate.
++
++::
++
++  int
++  PyArray_CanCoerceScalar(int thistype, int neededtype, NPY_SCALARKIND
++                          scalar)
++
++
++Determines whether the data type 'thistype', with
++scalar kind 'scalar', can be coerced into 'neededtype'.
++
++::
++
++  PyObject *
++  PyArray_NewFlagsObject(PyObject *obj)
++
++
++Get New ArrayFlagsObject
++
++::
++
++  npy_bool
++  PyArray_CanCastScalar(PyTypeObject *from, PyTypeObject *to)
++
++See if array scalars can be cast.
++
++TODO: For NumPy 2.0, add a NPY_CASTING parameter.
++
++::
++
++  int
 +  PyArray_CompareUCS4(npy_ucs4 const *s1, npy_ucs4 const *s2, size_t
 +                      len)
- 
- 
- ::
-@@ -712,6 +725,10 @@ don't use with PyArray_ITER_GOTO1D because factors are not adjusted
-   void
-   PyArray_Item_INCREF(char *data, PyArray_Descr *descr)
- 
++
++
++::
++
++  int
++  PyArray_RemoveSmallest(PyArrayMultiIterObject *multi)
++
++Adjusts previously broadcasted iterators so that the axis with
++the smallest sum of iterator strides is not iterated over.
++Returns dimension which is smallest in the range [0,multi->nd).
++A -1 is returned if multi->nd == 0.
++
++don't use with PyArray_ITER_GOTO1D because factors are not adjusted
++
++::
++
++  int
++  PyArray_ElementStrides(PyObject *obj)
++
++
++::
++
++  void
++  PyArray_Item_INCREF(char *data, PyArray_Descr *descr)
++
 +XINCREF all objects in a single array item. This is complicated for
 +structured datatypes where the position of objects needs to be extracted.
 +The function is execute recursively for each nested field or subarrays dtype
 +such as as `np.dtype([("field1", "O"), ("field2", "f,O", (3,2))])`
- 
- ::
- 
-@@ -719,6 +736,11 @@ don't use with PyArray_ITER_GOTO1D because factors are not adjusted
-   PyArray_Item_XDECREF(char *data, PyArray_Descr *descr)
- 
- 
++
++::
++
++  void
++  PyArray_Item_XDECREF(char *data, PyArray_Descr *descr)
++
++
 +XDECREF all objects in a single array item. This is complicated for
 +structured datatypes where the position of objects needs to be extracted.
 +The function is execute recursively for each nested field or subarrays dtype
 +such as as `np.dtype([("field1", "O"), ("field2", "f,O", (3,2))])`
 +
- ::
- 
-   PyObject *
-@@ -1029,28 +1051,28 @@ Returns a contiguous array
- ::
- 
-   npy_intp
--  PyArray_MultiplyList(npy_intp *l1, int n)
++::
++
++  PyObject *
++  PyArray_FieldNames(PyObject *fields)
++
++Return the tuple of ordered field names from a dictionary.
++
++::
++
++  PyObject *
++  PyArray_Transpose(PyArrayObject *ap, PyArray_Dims *permute)
++
++Return Transpose.
++
++::
++
++  PyObject *
++  PyArray_TakeFrom(PyArrayObject *self0, PyObject *indices0, int
++                   axis, PyArrayObject *out, NPY_CLIPMODE clipmode)
++
++Take
++
++::
++
++  PyObject *
++  PyArray_PutTo(PyArrayObject *self, PyObject*values0, PyObject
++                *indices0, NPY_CLIPMODE clipmode)
++
++Put values into an array
++
++::
++
++  PyObject *
++  PyArray_PutMask(PyArrayObject *self, PyObject*values0, PyObject*mask0)
++
++Put values into an array according to a mask.
++
++::
++
++  PyObject *
++  PyArray_Repeat(PyArrayObject *aop, PyObject *op, int axis)
++
++Repeat the array.
++
++::
++
++  PyObject *
++  PyArray_Choose(PyArrayObject *ip, PyObject *op, PyArrayObject
++                 *out, NPY_CLIPMODE clipmode)
++
++
++::
++
++  int
++  PyArray_Sort(PyArrayObject *op, int axis, NPY_SORTKIND which)
++
++Sort an array in-place
++
++::
++
++  PyObject *
++  PyArray_ArgSort(PyArrayObject *op, int axis, NPY_SORTKIND which)
++
++ArgSort an array
++
++::
++
++  PyObject *
++  PyArray_SearchSorted(PyArrayObject *op1, PyObject *op2, NPY_SEARCHSIDE
++                       side, PyObject *perm)
++
++
++Search the sorted array op1 for the location of the items in op2. The
++result is an array of indexes, one for each element in op2, such that if
++the item were to be inserted in op1 just before that index the array
++would still be in sorted order.
++
++Parameters
++----------
++op1 : PyArrayObject *
++Array to be searched, must be 1-D.
++op2 : PyObject *
++Array of items whose insertion indexes in op1 are wanted
++side : {NPY_SEARCHLEFT, NPY_SEARCHRIGHT}
++If NPY_SEARCHLEFT, return first valid insertion indexes
++If NPY_SEARCHRIGHT, return last valid insertion indexes
++perm : PyObject *
++Permutation array that sorts op1 (optional)
++
++Returns
++-------
++ret : PyObject *
++New reference to npy_intp array containing indexes where items in op2
++could be validly inserted into op1. NULL on error.
++
++Notes
++-----
++Binary search is used to find the indexes.
++
++::
++
++  PyObject *
++  PyArray_ArgMax(PyArrayObject *op, int axis, PyArrayObject *out)
++
++ArgMax
++
++::
++
++  PyObject *
++  PyArray_ArgMin(PyArrayObject *op, int axis, PyArrayObject *out)
++
++ArgMin
++
++::
++
++  PyObject *
++  PyArray_Reshape(PyArrayObject *self, PyObject *shape)
++
++Reshape
++
++::
++
++  PyObject *
++  PyArray_Newshape(PyArrayObject *self, PyArray_Dims *newdims, NPY_ORDER
++                   order)
++
++New shape for an array
++
++::
++
++  PyObject *
++  PyArray_Squeeze(PyArrayObject *self)
++
++
++return a new view of the array object with all of its unit-length
++dimensions squeezed out if needed, otherwise
++return the same array.
++
++::
++
++  PyObject *
++  PyArray_View(PyArrayObject *self, PyArray_Descr *type, PyTypeObject
++               *pytype)
++
++View
++steals a reference to type -- accepts NULL
++
++::
++
++  PyObject *
++  PyArray_SwapAxes(PyArrayObject *ap, int a1, int a2)
++
++SwapAxes
++
++::
++
++  PyObject *
++  PyArray_Max(PyArrayObject *ap, int axis, PyArrayObject *out)
++
++Max
++
++::
++
++  PyObject *
++  PyArray_Min(PyArrayObject *ap, int axis, PyArrayObject *out)
++
++Min
++
++::
++
++  PyObject *
++  PyArray_Ptp(PyArrayObject *ap, int axis, PyArrayObject *out)
++
++Ptp
++
++::
++
++  PyObject *
++  PyArray_Mean(PyArrayObject *self, int axis, int rtype, PyArrayObject
++               *out)
++
++Mean
++
++::
++
++  PyObject *
++  PyArray_Trace(PyArrayObject *self, int offset, int axis1, int
++                axis2, int rtype, PyArrayObject *out)
++
++Trace
++
++::
++
++  PyObject *
++  PyArray_Diagonal(PyArrayObject *self, int offset, int axis1, int
++                   axis2)
++
++Diagonal
++
++In NumPy versions prior to 1.7,  this function always returned a copy of
++the diagonal array. In 1.7, the code has been updated to compute a view
++onto 'self', but it still copies this array before returning, as well as
++setting the internal WARN_ON_WRITE flag. In a future version, it will
++simply return a view onto self.
++
++::
++
++  PyObject *
++  PyArray_Clip(PyArrayObject *self, PyObject *min, PyObject
++               *max, PyArrayObject *out)
++
++Clip
++
++::
++
++  PyObject *
++  PyArray_Conjugate(PyArrayObject *self, PyArrayObject *out)
++
++Conjugate
++
++::
++
++  PyObject *
++  PyArray_Nonzero(PyArrayObject *self)
++
++Nonzero
++
++TODO: In NumPy 2.0, should make the iteration order a parameter.
++
++::
++
++  PyObject *
++  PyArray_Std(PyArrayObject *self, int axis, int rtype, PyArrayObject
++              *out, int variance)
++
++Set variance to 1 to by-pass square-root calculation and return variance
++Std
++
++::
++
++  PyObject *
++  PyArray_Sum(PyArrayObject *self, int axis, int rtype, PyArrayObject
++              *out)
++
++Sum
++
++::
++
++  PyObject *
++  PyArray_CumSum(PyArrayObject *self, int axis, int rtype, PyArrayObject
++                 *out)
++
++CumSum
++
++::
++
++  PyObject *
++  PyArray_Prod(PyArrayObject *self, int axis, int rtype, PyArrayObject
++               *out)
++
++Prod
++
++::
++
++  PyObject *
++  PyArray_CumProd(PyArrayObject *self, int axis, int
++                  rtype, PyArrayObject *out)
++
++CumProd
++
++::
++
++  PyObject *
++  PyArray_All(PyArrayObject *self, int axis, PyArrayObject *out)
++
++All
++
++::
++
++  PyObject *
++  PyArray_Any(PyArrayObject *self, int axis, PyArrayObject *out)
++
++Any
++
++::
++
++  PyObject *
++  PyArray_Compress(PyArrayObject *self, PyObject *condition, int
++                   axis, PyArrayObject *out)
++
++Compress
++
++::
++
++  PyObject *
++  PyArray_Flatten(PyArrayObject *a, NPY_ORDER order)
++
++Flatten
++
++::
++
++  PyObject *
++  PyArray_Ravel(PyArrayObject *arr, NPY_ORDER order)
++
++Ravel
++Returns a contiguous array
++
++::
++
++  npy_intp
 +  PyArray_MultiplyList(npy_intp const *l1, int n)
- 
- Multiply a List
- 
- ::
- 
-   int
--  PyArray_MultiplyIntList(int *l1, int n)
++
++Multiply a List
++
++::
++
++  int
 +  PyArray_MultiplyIntList(int const *l1, int n)
- 
- Multiply a List of ints
- 
- ::
- 
-   void *
--  PyArray_GetPtr(PyArrayObject *obj, npy_intp*ind)
++
++Multiply a List of ints
++
++::
++
++  void *
 +  PyArray_GetPtr(PyArrayObject *obj, npy_intp const*ind)
- 
- Produce a pointer into array
- 
- ::
- 
-   int
--  PyArray_CompareLists(npy_intp *l1, npy_intp *l2, int n)
++
++Produce a pointer into array
++
++::
++
++  int
 +  PyArray_CompareLists(npy_intp const *l1, npy_intp const *l2, int n)
- 
- Compare Lists
- 
-@@ -1066,15 +1088,17 @@ steals a reference to typedescr -- can be NULL
- ::
- 
-   int
--  PyArray_As1D(PyObject **op, char **ptr, int *d1, int typecode)
++
++Compare Lists
++
++::
++
++  int
++  PyArray_AsCArray(PyObject **op, void *ptr, npy_intp *dims, int
++                   nd, PyArray_Descr*typedescr)
++
++Simulate a C-array
++steals a reference to typedescr -- can be NULL
++
++::
++
++  int
 +  PyArray_As1D(PyObject **NPY_UNUSED(op) , char **NPY_UNUSED(ptr) , int
 +               *NPY_UNUSED(d1) , int NPY_UNUSED(typecode) )
- 
- Convert to a 1D C-array
- 
- ::
- 
-   int
--  PyArray_As2D(PyObject **op, char ***ptr, int *d1, int *d2, int
--               typecode)
++
++Convert to a 1D C-array
++
++::
++
++  int
 +  PyArray_As2D(PyObject **NPY_UNUSED(op) , char ***NPY_UNUSED(ptr) , int
 +               *NPY_UNUSED(d1) , int *NPY_UNUSED(d2) , int
 +               NPY_UNUSED(typecode) )
- 
- Convert to a 2D C-array
- 
-@@ -1106,7 +1130,7 @@ as you get a new reference to it.
-   PyArray_IntpFromSequence(PyObject *seq, npy_intp *vals, int maxvals)
- 
- PyArray_IntpFromSequence
--Returns the number of dimensions or -1 if an error occurred.
++
++Convert to a 2D C-array
++
++::
++
++  int
++  PyArray_Free(PyObject *op, void *ptr)
++
++Free pointers created if As2D is called
++
++::
++
++  int
++  PyArray_Converter(PyObject *object, PyObject **address)
++
++
++Useful to pass as converter function for O& processing in PyArgs_ParseTuple.
++
++This conversion function can be used with the "O&" argument for
++PyArg_ParseTuple.  It will immediately return an object of array type
++or will convert to a NPY_ARRAY_CARRAY any other object.
++
++If you use PyArray_Converter, you must DECREF the array when finished
++as you get a new reference to it.
++
++::
++
++  int
++  PyArray_IntpFromSequence(PyObject *seq, npy_intp *vals, int maxvals)
++
++PyArray_IntpFromSequence
 +Returns the number of integers converted or -1 if an error occurred.
- vals must be large enough to hold maxvals
- 
- ::
-@@ -1258,24 +1282,25 @@ equivalent (same basic kind and same itemsize).
- ::
- 
-   PyObject *
--  PyArray_Zeros(int nd, npy_intp *dims, PyArray_Descr *type, int
++vals must be large enough to hold maxvals
++
++::
++
++  PyObject *
++  PyArray_Concatenate(PyObject *op, int axis)
++
++Concatenate
++
++Concatenate an arbitrary Python sequence into an array.
++op is a python object supporting the sequence interface.
++Its elements will be concatenated together to form a single
++multidimensional array. If axis is NPY_MAXDIMS or bigger, then
++each sequence object will be flattened before concatenation
++
++::
++
++  PyObject *
++  PyArray_InnerProduct(PyObject *op1, PyObject *op2)
++
++Numeric.innerproduct(a,v)
++
++::
++
++  PyObject *
++  PyArray_MatrixProduct(PyObject *op1, PyObject *op2)
++
++Numeric.matrixproduct(a,v)
++just like inner product but does the swapaxes stuff on the fly
++
++::
++
++  PyObject *
++  PyArray_CopyAndTranspose(PyObject *op)
++
++Copy and Transpose
++
++Could deprecate this function, as there isn't a speed benefit over
++calling Transpose and then Copy.
++
++::
++
++  PyObject *
++  PyArray_Correlate(PyObject *op1, PyObject *op2, int mode)
++
++Numeric.correlate(a1,a2,mode)
++
++::
++
++  int
++  PyArray_TypestrConvert(int itemsize, int gentype)
++
++Typestr converter
++
++::
++
++  int
++  PyArray_DescrConverter(PyObject *obj, PyArray_Descr **at)
++
++Get typenum from an object -- None goes to NPY_DEFAULT_TYPE
++This function takes a Python object representing a type and converts it
++to a the correct PyArray_Descr * structure to describe the type.
++
++Many objects can be used to represent a data-type which in NumPy is
++quite a flexible concept.
++
++This is the central code that converts Python objects to
++Type-descriptor objects that are used throughout numpy.
++
++Returns a new reference in *at, but the returned should not be
++modified as it may be one of the canonical immutable objects or
++a reference to the input obj.
++
++::
++
++  int
++  PyArray_DescrConverter2(PyObject *obj, PyArray_Descr **at)
++
++Get typenum from an object -- None goes to NULL
++
++::
++
++  int
++  PyArray_IntpConverter(PyObject *obj, PyArray_Dims *seq)
++
++Get intp chunk from sequence
++
++This function takes a Python sequence object and allocates and
++fills in an intp array with the converted values.
++
++Remember to free the pointer seq.ptr when done using
++PyDimMem_FREE(seq.ptr)**
++
++::
++
++  int
++  PyArray_BufferConverter(PyObject *obj, PyArray_Chunk *buf)
++
++Get buffer chunk from object
++
++this function takes a Python object which exposes the (single-segment)
++buffer interface and returns a pointer to the data segment
++
++You should increment the reference count by one of buf->base
++if you will hang on to a reference
++
++You only get a borrowed reference to the object. Do not free the
++memory...
++
++::
++
++  int
++  PyArray_AxisConverter(PyObject *obj, int *axis)
++
++Get axis from an object (possibly None) -- a converter function,
++
++See also PyArray_ConvertMultiAxis, which also handles a tuple of axes.
++
++::
++
++  int
++  PyArray_BoolConverter(PyObject *object, npy_bool *val)
++
++Convert an object to true / false
++
++::
++
++  int
++  PyArray_ByteorderConverter(PyObject *obj, char *endian)
++
++Convert object to endian
++
++::
++
++  int
++  PyArray_OrderConverter(PyObject *object, NPY_ORDER *val)
++
++Convert an object to FORTRAN / C / ANY / KEEP
++
++::
++
++  unsigned char
++  PyArray_EquivTypes(PyArray_Descr *type1, PyArray_Descr *type2)
++
++
++This function returns true if the two typecodes are
++equivalent (same basic kind and same itemsize).
++
++::
++
++  PyObject *
 +  PyArray_Zeros(int nd, npy_intp const *dims, PyArray_Descr *type, int
-                 is_f_order)
- 
- Zeros
- 
--steal a reference
++                is_f_order)
++
++Zeros
++
 +steals a reference to type. On failure or when dtype->subarray is
 +true, dtype will be decrefed.
- accepts NULL type
- 
- ::
- 
-   PyObject *
--  PyArray_Empty(int nd, npy_intp *dims, PyArray_Descr *type, int
++accepts NULL type
++
++::
++
++  PyObject *
 +  PyArray_Empty(int nd, npy_intp const *dims, PyArray_Descr *type, int
-                 is_f_order)
- 
- Empty
- 
- accepts NULL type
--steals referenct to type
++                is_f_order)
++
++Empty
++
++accepts NULL type
 +steals a reference to type
- 
- ::
- 
-@@ -1370,14 +1395,14 @@ Initialize arrfuncs to NULL
- ::
- 
-   PyObject *
--  PyArray_IntTupleFromIntp(int len, npy_intp *vals)
++
++::
++
++  PyObject *
++  PyArray_Where(PyObject *condition, PyObject *x, PyObject *y)
++
++Where
++
++::
++
++  PyObject *
++  PyArray_Arange(double start, double stop, double step, int type_num)
++
++Arange,
++
++::
++
++  PyObject *
++  PyArray_ArangeObj(PyObject *start, PyObject *stop, PyObject
++                    *step, PyArray_Descr *dtype)
++
++
++ArangeObj,
++
++this doesn't change the references
++
++::
++
++  int
++  PyArray_SortkindConverter(PyObject *obj, NPY_SORTKIND *sortkind)
++
++Convert object to sort kind
++
++::
++
++  PyObject *
++  PyArray_LexSort(PyObject *sort_keys, int axis)
++
++LexSort an array providing indices that will sort a collection of arrays
++lexicographically.  The first key is sorted on first, followed by the second key
++-- requires that arg"merge"sort is available for each sort_key
++
++Returns an index array that shows the indexes for the lexicographic sort along
++the given axis.
++
++::
++
++  PyObject *
++  PyArray_Round(PyArrayObject *a, int decimals, PyArrayObject *out)
++
++Round
++
++::
++
++  unsigned char
++  PyArray_EquivTypenums(int typenum1, int typenum2)
++
++
++::
++
++  int
++  PyArray_RegisterDataType(PyArray_Descr *descr)
++
++Register Data type
++Does not change the reference count of descr
++
++::
++
++  int
++  PyArray_RegisterCastFunc(PyArray_Descr *descr, int
++                           totype, PyArray_VectorUnaryFunc *castfunc)
++
++Register Casting Function
++Replaces any function currently stored.
++
++::
++
++  int
++  PyArray_RegisterCanCast(PyArray_Descr *descr, int
++                          totype, NPY_SCALARKIND scalar)
++
++Register a type number indicating that a descriptor can be cast
++to it safely
++
++::
++
++  void
++  PyArray_InitArrFuncs(PyArray_ArrFuncs *f)
++
++Initialize arrfuncs to NULL
++
++::
++
++  PyObject *
 +  PyArray_IntTupleFromIntp(int len, npy_intp const *vals)
- 
- PyArray_IntTupleFromIntp
- 
- ::
- 
-   int
--  PyArray_TypeNumFromName(char *str)
++
++PyArray_IntTupleFromIntp
++
++::
++
++  int
 +  PyArray_TypeNumFromName(char const *str)
- 
- 
- ::
-@@ -1459,24 +1484,24 @@ convert 0-d arrays to 1-d arrays
- ::
- 
-   npy_intp
--  PyArray_OverflowMultiplyList(npy_intp *l1, int n)
++
++
++::
++
++  int
++  PyArray_ClipmodeConverter(PyObject *object, NPY_CLIPMODE *val)
++
++Convert an object to NPY_RAISE / NPY_CLIP / NPY_WRAP
++
++::
++
++  int
++  PyArray_OutputConverter(PyObject *object, PyArrayObject **address)
++
++Useful to pass as converter function for O& processing in
++PyArgs_ParseTuple for output arrays
++
++::
++
++  PyObject *
++  PyArray_BroadcastToShape(PyObject *obj, npy_intp *dims, int nd)
++
++Get Iterator broadcast to a particular shape
++
++::
++
++  void
++  _PyArray_SigintHandler(int signum)
++
++
++::
++
++  void*
++  _PyArray_GetSigintBuf(void )
++
++
++::
++
++  int
++  PyArray_DescrAlignConverter(PyObject *obj, PyArray_Descr **at)
++
++
++Get type-descriptor from an object forcing alignment if possible
++None goes to DEFAULT type.
++
++any object with the .fields attribute and/or .itemsize attribute (if the
++.fields attribute does not give the total size -- i.e. a partial record
++naming).  If itemsize is given it must be >= size computed from fields
++
++The .fields attribute must return a convertible dictionary if present.
++Result inherits from NPY_VOID.
++
++::
++
++  int
++  PyArray_DescrAlignConverter2(PyObject *obj, PyArray_Descr **at)
++
++
++Get type-descriptor from an object forcing alignment if possible
++None goes to NULL.
++
++::
++
++  int
++  PyArray_SearchsideConverter(PyObject *obj, void *addr)
++
++Convert object to searchsorted side
++
++::
++
++  PyObject *
++  PyArray_CheckAxis(PyArrayObject *arr, int *axis, int flags)
++
++PyArray_CheckAxis
++
++check that axis is valid
++convert 0-d arrays to 1-d arrays
++
++::
++
++  npy_intp
 +  PyArray_OverflowMultiplyList(npy_intp const *l1, int n)
- 
- Multiply a List of Non-negative numbers with over-flow detection.
- 
- ::
- 
-   int
--  PyArray_CompareString(char *s1, char *s2, size_t len)
++
++Multiply a List of Non-negative numbers with over-flow detection.
++
++::
++
++  int
 +  PyArray_CompareString(const char *s1, const char *s2, size_t len)
- 
- 
- ::
- 
--  PyObject *
++
++
++::
++
 +  PyObject*
-   PyArray_MultiIterFromObjects(PyObject **mps, int n, int nadd, ... )
- 
- Get MultiIterator from array of Python objects and any additional
- 
--PyObject **mps -- array of PyObjects
++  PyArray_MultiIterFromObjects(PyObject **mps, int n, int nadd, ... )
++
++Get MultiIterator from array of Python objects and any additional
++
 +PyObject **mps - array of PyObjects
- int n - number of PyObjects in the array
- int nadd - number of additional arrays to include in the iterator.
- 
-@@ -1508,7 +1533,7 @@ correlate(a2, a1), and conjugate the second argument for complex inputs
- ::
- 
-   PyObject*
--  PyArray_NeighborhoodIterNew(PyArrayIterObject *x, npy_intp
++int n - number of PyObjects in the array
++int nadd - number of additional arrays to include in the iterator.
++
++Returns a multi-iterator object.
++
++::
++
++  int
++  PyArray_GetEndianness(void )
++
++
++::
++
++  unsigned int
++  PyArray_GetNDArrayCFeatureVersion(void )
++
++Returns the built-in (at compilation time) C API version
++
++::
++
++  PyObject *
++  PyArray_Correlate2(PyObject *op1, PyObject *op2, int mode)
++
++correlate(a1,a2,mode)
++
++This function computes the usual correlation (correlate(a1, a2) !=
++correlate(a2, a1), and conjugate the second argument for complex inputs
++
++::
++
++  PyObject*
 +  PyArray_NeighborhoodIterNew(PyArrayIterObject *x, const npy_intp
-                               *bounds, int mode, PyArrayObject*fill)
- 
- A Neighborhood Iterator object.
-@@ -1516,7 +1541,7 @@ A Neighborhood Iterator object.
- ::
- 
-   void
--  PyArray_SetDatetimeParseFunction(PyObject *op)
++                              *bounds, int mode, PyArrayObject*fill)
++
++A Neighborhood Iterator object.
++
++::
++
++  void
 +  PyArray_SetDatetimeParseFunction(PyObject *NPY_UNUSED(op) )
- 
- This function is scheduled to be removed
- 
-@@ -1525,8 +1550,9 @@ TO BE REMOVED - NOT USED INTERNALLY.
- ::
- 
-   void
--  PyArray_DatetimeToDatetimeStruct(npy_datetime val, NPY_DATETIMEUNIT
--                                   fr, npy_datetimestruct *result)
++
++This function is scheduled to be removed
++
++TO BE REMOVED - NOT USED INTERNALLY.
++
++::
++
++  void
 +  PyArray_DatetimeToDatetimeStruct(npy_datetime NPY_UNUSED(val)
 +                                   , NPY_DATETIMEUNIT NPY_UNUSED(fr)
 +                                   , npy_datetimestruct *result)
- 
- Fill the datetime struct from the value and resolution unit.
- 
-@@ -1535,8 +1561,9 @@ TO BE REMOVED - NOT USED INTERNALLY.
- ::
- 
-   void
--  PyArray_TimedeltaToTimedeltaStruct(npy_timedelta val, NPY_DATETIMEUNIT
--                                     fr, npy_timedeltastruct *result)
++
++Fill the datetime struct from the value and resolution unit.
++
++TO BE REMOVED - NOT USED INTERNALLY.
++
++::
++
++  void
 +  PyArray_TimedeltaToTimedeltaStruct(npy_timedelta NPY_UNUSED(val)
 +                                     , NPY_DATETIMEUNIT NPY_UNUSED(fr)
 +                                     , npy_timedeltastruct *result)
- 
- Fill the timedelta struct from the timedelta value and resolution unit.
- 
-@@ -1545,8 +1572,8 @@ TO BE REMOVED - NOT USED INTERNALLY.
- ::
- 
-   npy_datetime
--  PyArray_DatetimeStructToDatetime(NPY_DATETIMEUNIT
--                                   fr, npy_datetimestruct *d)
++
++Fill the timedelta struct from the timedelta value and resolution unit.
++
++TO BE REMOVED - NOT USED INTERNALLY.
++
++::
++
++  npy_datetime
 +  PyArray_DatetimeStructToDatetime(NPY_DATETIMEUNIT NPY_UNUSED(fr)
 +                                   , npy_datetimestruct *NPY_UNUSED(d) )
- 
- Create a datetime value from a filled datetime struct and resolution unit.
- 
-@@ -1555,8 +1582,9 @@ TO BE REMOVED - NOT USED INTERNALLY.
- ::
- 
-   npy_datetime
--  PyArray_TimedeltaStructToTimedelta(NPY_DATETIMEUNIT
--                                     fr, npy_timedeltastruct *d)
++
++Create a datetime value from a filled datetime struct and resolution unit.
++
++TO BE REMOVED - NOT USED INTERNALLY.
++
++::
++
++  npy_datetime
 +  PyArray_TimedeltaStructToTimedelta(NPY_DATETIMEUNIT NPY_UNUSED(fr)
 +                                     , npy_timedeltastruct
 +                                     *NPY_UNUSED(d) )
- 
- Create a timdelta value from a filled timedelta struct and resolution unit.
- 
-@@ -1784,7 +1812,7 @@ the GIL.
- ::
- 
-   int
--  NpyIter_GotoMultiIndex(NpyIter *iter, npy_intp *multi_index)
++
++Create a timdelta value from a filled timedelta struct and resolution unit.
++
++TO BE REMOVED - NOT USED INTERNALLY.
++
++::
++
++  NpyIter *
++  NpyIter_New(PyArrayObject *op, npy_uint32 flags, NPY_ORDER
++              order, NPY_CASTING casting, PyArray_Descr*dtype)
++
++Allocate a new iterator for one array object.
++
++::
++
++  NpyIter *
++  NpyIter_MultiNew(int nop, PyArrayObject **op_in, npy_uint32
++                   flags, NPY_ORDER order, NPY_CASTING
++                   casting, npy_uint32 *op_flags, PyArray_Descr
++                   **op_request_dtypes)
++
++Allocate a new iterator for more than one array object, using
++standard NumPy broadcasting rules and the default buffer size.
++
++::
++
++  NpyIter *
++  NpyIter_AdvancedNew(int nop, PyArrayObject **op_in, npy_uint32
++                      flags, NPY_ORDER order, NPY_CASTING
++                      casting, npy_uint32 *op_flags, PyArray_Descr
++                      **op_request_dtypes, int oa_ndim, int
++                      **op_axes, npy_intp *itershape, npy_intp
++                      buffersize)
++
++Allocate a new iterator for multiple array objects, and advanced
++options for controlling the broadcasting, shape, and buffer size.
++
++::
++
++  NpyIter *
++  NpyIter_Copy(NpyIter *iter)
++
++Makes a copy of the iterator
++
++::
++
++  int
++  NpyIter_Deallocate(NpyIter *iter)
++
++Deallocate an iterator
++
++::
++
++  npy_bool
++  NpyIter_HasDelayedBufAlloc(NpyIter *iter)
++
++Whether the buffer allocation is being delayed
++
++::
++
++  npy_bool
++  NpyIter_HasExternalLoop(NpyIter *iter)
++
++Whether the iterator handles the inner loop
++
++::
++
++  int
++  NpyIter_EnableExternalLoop(NpyIter *iter)
++
++Removes the inner loop handling (so HasExternalLoop returns true)
++
++::
++
++  npy_intp *
++  NpyIter_GetInnerStrideArray(NpyIter *iter)
++
++Get the array of strides for the inner loop (when HasExternalLoop is true)
++
++This function may be safely called without holding the Python GIL.
++
++::
++
++  npy_intp *
++  NpyIter_GetInnerLoopSizePtr(NpyIter *iter)
++
++Get a pointer to the size of the inner loop  (when HasExternalLoop is true)
++
++This function may be safely called without holding the Python GIL.
++
++::
++
++  int
++  NpyIter_Reset(NpyIter *iter, char **errmsg)
++
++Resets the iterator to its initial state
++
++If errmsg is non-NULL, it should point to a variable which will
++receive the error message, and no Python exception will be set.
++This is so that the function can be called from code not holding
++the GIL.
++
++::
++
++  int
++  NpyIter_ResetBasePointers(NpyIter *iter, char **baseptrs, char
++                            **errmsg)
++
++Resets the iterator to its initial state, with new base data pointers.
++This function requires great caution.
++
++If errmsg is non-NULL, it should point to a variable which will
++receive the error message, and no Python exception will be set.
++This is so that the function can be called from code not holding
++the GIL.
++
++::
++
++  int
++  NpyIter_ResetToIterIndexRange(NpyIter *iter, npy_intp istart, npy_intp
++                                iend, char **errmsg)
++
++Resets the iterator to a new iterator index range
++
++If errmsg is non-NULL, it should point to a variable which will
++receive the error message, and no Python exception will be set.
++This is so that the function can be called from code not holding
++the GIL.
++
++::
++
++  int
++  NpyIter_GetNDim(NpyIter *iter)
++
++Gets the number of dimensions being iterated
++
++::
++
++  int
++  NpyIter_GetNOp(NpyIter *iter)
++
++Gets the number of operands being iterated
++
++::
++
++  NpyIter_IterNextFunc *
++  NpyIter_GetIterNext(NpyIter *iter, char **errmsg)
++
++Compute the specialized iteration function for an iterator
++
++If errmsg is non-NULL, it should point to a variable which will
++receive the error message, and no Python exception will be set.
++This is so that the function can be called from code not holding
++the GIL.
++
++::
++
++  npy_intp
++  NpyIter_GetIterSize(NpyIter *iter)
++
++Gets the number of elements being iterated
++
++::
++
++  void
++  NpyIter_GetIterIndexRange(NpyIter *iter, npy_intp *istart, npy_intp
++                            *iend)
++
++Gets the range of iteration indices being iterated
++
++::
++
++  npy_intp
++  NpyIter_GetIterIndex(NpyIter *iter)
++
++Gets the current iteration index
++
++::
++
++  int
++  NpyIter_GotoIterIndex(NpyIter *iter, npy_intp iterindex)
++
++Sets the iterator position to the specified iterindex,
++which matches the iteration order of the iterator.
++
++Returns NPY_SUCCEED on success, NPY_FAIL on failure.
++
++::
++
++  npy_bool
++  NpyIter_HasMultiIndex(NpyIter *iter)
++
++Whether the iterator is tracking a multi-index
++
++::
++
++  int
++  NpyIter_GetShape(NpyIter *iter, npy_intp *outshape)
++
++Gets the broadcast shape if a multi-index is being tracked by the iterator,
++otherwise gets the shape of the iteration as Fortran-order
++(fastest-changing index first).
++
++The reason Fortran-order is returned when a multi-index
++is not enabled is that this is providing a direct view into how
++the iterator traverses the n-dimensional space. The iterator organizes
++its memory from fastest index to slowest index, and when
++a multi-index is enabled, it uses a permutation to recover the original
++order.
++
++Returns NPY_SUCCEED or NPY_FAIL.
++
++::
++
++  NpyIter_GetMultiIndexFunc *
++  NpyIter_GetGetMultiIndex(NpyIter *iter, char **errmsg)
++
++Compute a specialized get_multi_index function for the iterator
++
++If errmsg is non-NULL, it should point to a variable which will
++receive the error message, and no Python exception will be set.
++This is so that the function can be called from code not holding
++the GIL.
++
++::
++
++  int
 +  NpyIter_GotoMultiIndex(NpyIter *iter, npy_intp const *multi_index)
- 
- Sets the iterator to the specified multi-index, which must have the
- correct number of entries for 'ndim'.  It is only valid
-@@ -2135,7 +2163,8 @@ dtype     - If not NULL, overrides the data type of the result.
- subok     - If 1, use the prototype's array subtype, otherwise
- always create a base-class array.
- 
--NOTE: If dtype is not NULL, steals the dtype reference.
++
++Sets the iterator to the specified multi-index, which must have the
++correct number of entries for 'ndim'.  It is only valid
++when NPY_ITER_MULTI_INDEX was passed to the constructor.  This operation
++fails if the multi-index is out of bounds.
++
++Returns NPY_SUCCEED on success, NPY_FAIL on failure.
++
++::
++
++  int
++  NpyIter_RemoveMultiIndex(NpyIter *iter)
++
++Removes multi-index support from an iterator.
++
++Returns NPY_SUCCEED or NPY_FAIL.
++
++::
++
++  npy_bool
++  NpyIter_HasIndex(NpyIter *iter)
++
++Whether the iterator is tracking an index
++
++::
++
++  npy_bool
++  NpyIter_IsBuffered(NpyIter *iter)
++
++Whether the iterator is buffered
++
++::
++
++  npy_bool
++  NpyIter_IsGrowInner(NpyIter *iter)
++
++Whether the inner loop can grow if buffering is unneeded
++
++::
++
++  npy_intp
++  NpyIter_GetBufferSize(NpyIter *iter)
++
++Gets the size of the buffer, or 0 if buffering is not enabled
++
++::
++
++  npy_intp *
++  NpyIter_GetIndexPtr(NpyIter *iter)
++
++Get a pointer to the index, if it is being tracked
++
++::
++
++  int
++  NpyIter_GotoIndex(NpyIter *iter, npy_intp flat_index)
++
++If the iterator is tracking an index, sets the iterator
++to the specified index.
++
++Returns NPY_SUCCEED on success, NPY_FAIL on failure.
++
++::
++
++  char **
++  NpyIter_GetDataPtrArray(NpyIter *iter)
++
++Get the array of data pointers (1 per object being iterated)
++
++This function may be safely called without holding the Python GIL.
++
++::
++
++  PyArray_Descr **
++  NpyIter_GetDescrArray(NpyIter *iter)
++
++Get the array of data type pointers (1 per object being iterated)
++
++::
++
++  PyArrayObject **
++  NpyIter_GetOperandArray(NpyIter *iter)
++
++Get the array of objects being iterated
++
++::
++
++  PyArrayObject *
++  NpyIter_GetIterView(NpyIter *iter, npy_intp i)
++
++Returns a view to the i-th object with the iterator's internal axes
++
++::
++
++  void
++  NpyIter_GetReadFlags(NpyIter *iter, char *outreadflags)
++
++Gets an array of read flags (1 per object being iterated)
++
++::
++
++  void
++  NpyIter_GetWriteFlags(NpyIter *iter, char *outwriteflags)
++
++Gets an array of write flags (1 per object being iterated)
++
++::
++
++  void
++  NpyIter_DebugPrint(NpyIter *iter)
++
++For debugging
++
++::
++
++  npy_bool
++  NpyIter_IterationNeedsAPI(NpyIter *iter)
++
++Whether the iteration loop, and in particular the iternext()
++function, needs API access.  If this is true, the GIL must
++be retained while iterating.
++
++::
++
++  void
++  NpyIter_GetInnerFixedStrideArray(NpyIter *iter, npy_intp *out_strides)
++
++Get an array of strides which are fixed.  Any strides which may
++change during iteration receive the value NPY_MAX_INTP.  Once
++the iterator is ready to iterate, call this to get the strides
++which will always be fixed in the inner loop, then choose optimized
++inner loop functions which take advantage of those fixed strides.
++
++This function may be safely called without holding the Python GIL.
++
++::
++
++  int
++  NpyIter_RemoveAxis(NpyIter *iter, int axis)
++
++Removes an axis from iteration. This requires that NPY_ITER_MULTI_INDEX
++was set for iterator creation, and does not work if buffering is
++enabled. This function also resets the iterator to its initial state.
++
++Returns NPY_SUCCEED or NPY_FAIL.
++
++::
++
++  npy_intp *
++  NpyIter_GetAxisStrideArray(NpyIter *iter, int axis)
++
++Gets the array of strides for the specified axis.
++If the iterator is tracking a multi-index, gets the strides
++for the axis specified, otherwise gets the strides for
++the iteration axis as Fortran order (fastest-changing axis first).
++
++Returns NULL if an error occurs.
++
++::
++
++  npy_bool
++  NpyIter_RequiresBuffering(NpyIter *iter)
++
++Whether the iteration could be done with no buffering.
++
++::
++
++  char **
++  NpyIter_GetInitialDataPtrArray(NpyIter *iter)
++
++Get the array of data pointers (1 per object being iterated),
++directly into the arrays (never pointing to a buffer), for starting
++unbuffered iteration. This always returns the addresses for the
++iterator position as reset to iterator index 0.
++
++These pointers are different from the pointers accepted by
++NpyIter_ResetBasePointers, because the direction along some
++axes may have been reversed, requiring base offsets.
++
++This function may be safely called without holding the Python GIL.
++
++::
++
++  int
++  NpyIter_CreateCompatibleStrides(NpyIter *iter, npy_intp
++                                  itemsize, npy_intp *outstrides)
++
++Builds a set of strides which are the same as the strides of an
++output array created using the NPY_ITER_ALLOCATE flag, where NULL
++was passed for op_axes.  This is for data packed contiguously,
++but not necessarily in C or Fortran order. This should be used
++together with NpyIter_GetShape and NpyIter_GetNDim.
++
++A use case for this function is to match the shape and layout of
++the iterator and tack on one or more dimensions.  For example,
++in order to generate a vector per input value for a numerical gradient,
++you pass in ndim*itemsize for itemsize, then add another dimension to
++the end with size ndim and stride itemsize.  To do the Hessian matrix,
++you do the same thing but add two dimensions, or take advantage of
++the symmetry and pack it into 1 dimension with a particular encoding.
++
++This function may only be called if the iterator is tracking a multi-index
++and if NPY_ITER_DONT_NEGATE_STRIDES was used to prevent an axis from
++being iterated in reverse order.
++
++If an array is created with this method, simply adding 'itemsize'
++for each iteration will traverse the new array matching the
++iterator.
++
++Returns NPY_SUCCEED or NPY_FAIL.
++
++::
++
++  int
++  PyArray_CastingConverter(PyObject *obj, NPY_CASTING *casting)
++
++Convert any Python object, *obj*, to an NPY_CASTING enum.
++
++::
++
++  npy_intp
++  PyArray_CountNonzero(PyArrayObject *self)
++
++Counts the number of non-zero elements in the array.
++
++Returns -1 on error.
++
++::
++
++  PyArray_Descr *
++  PyArray_PromoteTypes(PyArray_Descr *type1, PyArray_Descr *type2)
++
++Produces the smallest size and lowest kind type to which both
++input types can be cast.
++
++::
++
++  PyArray_Descr *
++  PyArray_MinScalarType(PyArrayObject *arr)
++
++If arr is a scalar (has 0 dimensions) with a built-in number data type,
++finds the smallest type size/kind which can still represent its data.
++Otherwise, returns the array's data type.
++
++
++::
++
++  PyArray_Descr *
++  PyArray_ResultType(npy_intp narrs, PyArrayObject **arr, npy_intp
++                     ndtypes, PyArray_Descr **dtypes)
++
++Produces the result type of a bunch of inputs, using the UFunc
++type promotion rules. Use this function when you have a set of
++input arrays, and need to determine an output array dtype.
++
++If all the inputs are scalars (have 0 dimensions) or the maximum "kind"
++of the scalars is greater than the maximum "kind" of the arrays, does
++a regular type promotion.
++
++Otherwise, does a type promotion on the MinScalarType
++of all the inputs.  Data types passed directly are treated as array
++types.
++
++
++::
++
++  npy_bool
++  PyArray_CanCastArrayTo(PyArrayObject *arr, PyArray_Descr
++                         *to, NPY_CASTING casting)
++
++Returns 1 if the array object may be cast to the given data type using
++the casting rule, 0 otherwise.  This differs from PyArray_CanCastTo in
++that it handles scalar arrays (0 dimensions) specially, by checking
++their value.
++
++::
++
++  npy_bool
++  PyArray_CanCastTypeTo(PyArray_Descr *from, PyArray_Descr
++                        *to, NPY_CASTING casting)
++
++Returns true if data of type 'from' may be cast to data of type
++'to' according to the rule 'casting'.
++
++::
++
++  PyArrayObject *
++  PyArray_EinsteinSum(char *subscripts, npy_intp nop, PyArrayObject
++                      **op_in, PyArray_Descr *dtype, NPY_ORDER
++                      order, NPY_CASTING casting, PyArrayObject *out)
++
++This function provides summation of array elements according to
++the Einstein summation convention.  For example:
++- trace(a)        -> einsum("ii", a)
++- transpose(a)    -> einsum("ji", a)
++- multiply(a,b)   -> einsum(",", a, b)
++- inner(a,b)      -> einsum("i,i", a, b)
++- outer(a,b)      -> einsum("i,j", a, b)
++- matvec(a,b)     -> einsum("ij,j", a, b)
++- matmat(a,b)     -> einsum("ij,jk", a, b)
++
++subscripts: The string of subscripts for einstein summation.
++nop:        The number of operands
++op_in:      The array of operands
++dtype:      Either NULL, or the data type to force the calculation as.
++order:      The order for the calculation/the output axes.
++casting:    What kind of casts should be permitted.
++out:        Either NULL, or an array into which the output should be placed.
++
++By default, the labels get placed in alphabetical order
++at the end of the output. So, if c = einsum("i,j", a, b)
++then c[i,j] == a[i]*b[j], but if c = einsum("j,i", a, b)
++then c[i,j] = a[j]*b[i].
++
++Alternatively, you can control the output order or prevent
++an axis from being summed/force an axis to be summed by providing
++indices for the output. This allows us to turn 'trace' into
++'diag', for example.
++- diag(a)         -> einsum("ii->i", a)
++- sum(a, axis=0)  -> einsum("i...->", a)
++
++Subscripts at the beginning and end may be specified by
++putting an ellipsis "..." in the middle.  For example,
++the function einsum("i...i", a) takes the diagonal of
++the first and last dimensions of the operand, and
++einsum("ij...,jk...->ik...") takes the matrix product using
++the first two indices of each operand instead of the last two.
++
++When there is only one operand, no axes being summed, and
++no output parameter, this function returns a view
++into the operand instead of making a copy.
++
++::
++
++  PyObject *
++  PyArray_NewLikeArray(PyArrayObject *prototype, NPY_ORDER
++                       order, PyArray_Descr *dtype, int subok)
++
++Creates a new array with the same shape as the provided one,
++with possible memory layout order and data type changes.
++
++prototype - The array the new one should be like.
++order     - NPY_CORDER - C-contiguous result.
++NPY_FORTRANORDER - Fortran-contiguous result.
++NPY_ANYORDER - Fortran if prototype is Fortran, C otherwise.
++NPY_KEEPORDER - Keeps the axis ordering of prototype.
++dtype     - If not NULL, overrides the data type of the result.
++subok     - If 1, use the prototype's array subtype, otherwise
++always create a base-class array.
++
 +NOTE: If dtype is not NULL, steals the dtype reference.  On failure or when
 +dtype->subarray is true, dtype will be decrefed.
- 
- ::
- 
-@@ -2147,60 +2176,6 @@ NOTE: If dtype is not NULL, steals the dtype reference.
-                                    *out_dims, PyArrayObject
-                                    **out_arr, PyObject *context)
- 
--Retrieves the array parameters for viewing/converting an arbitrary
--PyObject* to a NumPy array. This allows the "innate type and shape"
--of Python list-of-lists to be discovered without
--actually converting to an array.
--
--In some cases, such as structured arrays and the __array__ interface,
--a data type needs to be used to make sense of the object.  When
--this is needed, provide a Descr for 'requested_dtype', otherwise
--provide NULL. This reference is not stolen. Also, if the requested
--dtype doesn't modify the interpretation of the input, out_dtype will
--still get the "innate" dtype of the object, not the dtype passed
--in 'requested_dtype'.
--
--If writing to the value in 'op' is desired, set the boolean
--'writeable' to 1.  This raises an error when 'op' is a scalar, list
--of lists, or other non-writeable 'op'.
--
--Result: When success (0 return value) is returned, either out_arr
--is filled with a non-NULL PyArrayObject and
--the rest of the parameters are untouched, or out_arr is
--filled with NULL, and the rest of the parameters are
--filled.
--
--Typical usage:
--
--PyArrayObject *arr = NULL;
--PyArray_Descr *dtype = NULL;
--int ndim = 0;
--npy_intp dims[NPY_MAXDIMS];
--
--if (PyArray_GetArrayParamsFromObject(op, NULL, 1, &dtype,
--&ndim, &dims, &arr, NULL) < 0) {
--return NULL;
--}
--if (arr == NULL) {
--... validate/change dtype, validate flags, ndim, etc ...
--// Could make custom strides here too
--arr = PyArray_NewFromDescr(&PyArray_Type, dtype, ndim,
--dims, NULL,
--is_f_order ? NPY_ARRAY_F_CONTIGUOUS : 0,
--NULL);
--if (arr == NULL) {
--return NULL;
--}
--if (PyArray_CopyObject(arr, op) < 0) {
--Py_DECREF(arr);
--return NULL;
--}
--}
--else {
--... in this case the other parameters weren't filled, just
--validate and possibly copy arr itself ...
--}
--... use arr ...
- 
- ::
- 
-@@ -2218,7 +2193,7 @@ could be applied to each axis, like in ravel_multi_index.
-   PyArray_MatrixProduct2(PyObject *op1, PyObject
-                          *op2, PyArrayObject*out)
- 
--Numeric.matrixproduct(a,v,out)
++
++::
++
++  int
++  PyArray_GetArrayParamsFromObject(PyObject *op, PyArray_Descr
++                                   *requested_dtype, npy_bool
++                                   writeable, PyArray_Descr
++                                   **out_dtype, int *out_ndim, npy_intp
++                                   *out_dims, PyArrayObject
++                                   **out_arr, PyObject *context)
++
++
++::
++
++  int
++  PyArray_ConvertClipmodeSequence(PyObject *object, NPY_CLIPMODE
++                                  *modes, int n)
++
++Convert an object to an array of n NPY_CLIPMODE values.
++This is intended to be used in functions where a different mode
++could be applied to each axis, like in ravel_multi_index.
++
++::
++
++  PyObject *
++  PyArray_MatrixProduct2(PyObject *op1, PyObject
++                         *op2, PyArrayObject*out)
++
 +Numeric.matrixproduct2(a,v,out)
- just like inner product but does the swapaxes stuff on the fly
- 
- ::
-@@ -2260,7 +2235,7 @@ Returns 0 on success, -1 on failure.
- ::
- 
-   void
--  PyArray_CreateSortedStridePerm(int ndim, npy_intp
++just like inner product but does the swapaxes stuff on the fly
++
++::
++
++  npy_bool
++  NpyIter_IsFirstVisit(NpyIter *iter, int iop)
++
++Checks to see whether this is the first time the elements
++of the specified reduction operand which the iterator points at are
++being seen for the first time. The function returns
++a reasonable answer for reduction operands and when buffering is
++disabled. The answer may be incorrect for buffered non-reduction
++operands.
++
++This function is intended to be used in EXTERNAL_LOOP mode only,
++and will produce some wrong answers when that mode is not enabled.
++
++If this function returns true, the caller should also
++check the inner loop stride of the operand, because if
++that stride is 0, then only the first element of the innermost
++external loop is being visited for the first time.
++
++WARNING: For performance reasons, 'iop' is not bounds-checked,
++it is not confirmed that 'iop' is actually a reduction
++operand, and it is not confirmed that EXTERNAL_LOOP
++mode is enabled. These checks are the responsibility of
++the caller, and should be done outside of any inner loops.
++
++::
++
++  int
++  PyArray_SetBaseObject(PyArrayObject *arr, PyObject *obj)
++
++Sets the 'base' attribute of the array. This steals a reference
++to 'obj'.
++
++Returns 0 on success, -1 on failure.
++
++::
++
++  void
 +  PyArray_CreateSortedStridePerm(int ndim, npy_intp const
-                                  *strides, npy_stride_sort_item
-                                  *out_strideperm)
- 
-@@ -2273,7 +2248,7 @@ For example, the stride array (4, -2, 12) becomes
- ::
- 
-   void
--  PyArray_RemoveAxesInPlace(PyArrayObject *arr, npy_bool *flags)
++                                 *strides, npy_stride_sort_item
++                                 *out_strideperm)
++
++
++This function populates the first ndim elements
++of strideperm with sorted descending by their absolute values.
++For example, the stride array (4, -2, 12) becomes
++[(2, 12), (0, 4), (1, -2)].
++
++::
++
++  void
 +  PyArray_RemoveAxesInPlace(PyArrayObject *arr, const npy_bool *flags)
- 
- 
- Removes the axes flagged as True from the array,
-@@ -2284,6 +2259,10 @@ index zero for that axis.
- WARNING: If an axis flagged for removal has a shape equal to zero,
- the array will point to invalid memory. The caller must
- validate this!
++
++
++Removes the axes flagged as True from the array,
++modifying it in place. If an axis flagged for removal
++has a shape entry bigger than one, this effectively selects
++index zero for that axis.
++
++WARNING: If an axis flagged for removal has a shape equal to zero,
++the array will point to invalid memory. The caller must
++validate this!
 +If an axis flagged for removal has a shape larger than one,
 +the aligned flag (and in the future the contiguous flags),
 +may need explicit update.
 +(check also NPY_RELAXED_STRIDES_CHECKING)
- 
- For example, this can be used to remove the reduction axes
- from a reduction result once its computation is complete.
-@@ -2321,7 +2300,7 @@ just "array".
- Precondition: 'arr' is a copy of 'base' (though possibly with different
- strides, ordering, etc.). This function sets the UPDATEIFCOPY flag and the
- ->base pointer on 'arr', so that when 'arr' is destructed, it will copy any
--changes back to 'base'.
++
++For example, this can be used to remove the reduction axes
++from a reduction result once its computation is complete.
++
++::
++
++  void
++  PyArray_DebugPrint(PyArrayObject *obj)
++
++Prints the raw data of the ndarray in a form useful for debugging
++low-level C issues.
++
++::
++
++  int
++  PyArray_FailUnlessWriteable(PyArrayObject *obj, const char *name)
++
++
++This function does nothing if obj is writeable, and raises an exception
++(and returns -1) if obj is not writeable. It may also do other
++house-keeping, such as issuing warnings on arrays which are transitioning
++to become views. Always call this function at some point before writing to
++an array.
++
++'name' is a name for the array, used to give better error
++messages. Something like "assignment destination", "output array", or even
++just "array".
++
++::
++
++  int
++  PyArray_SetUpdateIfCopyBase(PyArrayObject *arr, PyArrayObject *base)
++
++
++Precondition: 'arr' is a copy of 'base' (though possibly with different
++strides, ordering, etc.). This function sets the UPDATEIFCOPY flag and the
++->base pointer on 'arr', so that when 'arr' is destructed, it will copy any
 +changes back to 'base'. DEPRECATED, use PyArray_SetWritebackIfCopyBase
- 
- Steals a reference to 'base'.
- 
-@@ -2370,6 +2349,111 @@ result = PyDataMem_RENEW(ptr, size) -> (*hook)(ptr, result, size, user_data)
- When the hook is called, the GIL will be held by the calling
- thread.  The hook should be written to be reentrant, if it performs
- operations that might cause new allocation events (such as the
--creation/descruction numpy objects, or creating/destroying Python
++
++Steals a reference to 'base'.
++
++Returns 0 on success, -1 on failure.
++
++::
++
++  void *
++  PyDataMem_NEW(size_t size)
++
++Allocates memory for array data.
++
++::
++
++  void
++  PyDataMem_FREE(void *ptr)
++
++Free memory for array data.
++
++::
++
++  void *
++  PyDataMem_RENEW(void *ptr, size_t size)
++
++Reallocate/resize memory for array data.
++
++::
++
++  PyDataMem_EventHookFunc *
++  PyDataMem_SetEventHook(PyDataMem_EventHookFunc *newhook, void
++                         *user_data, void **old_data)
++
++Sets the allocation event hook for numpy array data.
++Takes a PyDataMem_EventHookFunc *, which has the signature:
++void hook(void *old, void *new, size_t size, void *user_data).
++Also takes a void *user_data, and void **old_data.
++
++Returns a pointer to the previous hook or NULL.  If old_data is
++non-NULL, the previous user_data pointer will be copied to it.
++
++If not NULL, hook will be called at the end of each PyDataMem_NEW/FREE/RENEW:
++result = PyDataMem_NEW(size)        -> (*hook)(NULL, result, size, user_data)
++PyDataMem_FREE(ptr)                 -> (*hook)(ptr, NULL, 0, user_data)
++result = PyDataMem_RENEW(ptr, size) -> (*hook)(ptr, result, size, user_data)
++
++When the hook is called, the GIL will be held by the calling
++thread.  The hook should be written to be reentrant, if it performs
++operations that might cause new allocation events (such as the
 +creation/destruction numpy objects, or creating/destroying Python
- objects which might cause a gc)
- 
++objects which might cause a gc)
++
 +::
 +
 +  void
@@ -2539,10 +3945,9 @@ index 7e588f067..3a3268f27 100644
 +
 +Returns 0 on success, -1 on failure.
 +
-diff --git a/include/numpy/ndarrayobject.h b/include/numpy/ndarrayobject.h
-index f00dd7744..5ef1f10aa 100644
---- a/include/numpy/ndarrayobject.h
-+++ b/include/numpy/ndarrayobject.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/ndarrayobject.h spacy-2.3.2/include/numpy/ndarrayobject.h
+--- spacy-2.3.2-orig/include/numpy/ndarrayobject.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/ndarrayobject.h	2020-11-11 13:37:37.422412633 +0100
 @@ -5,15 +5,10 @@
  #ifndef NPY_NDARRAYOBJECT_H
  #define NPY_NDARRAYOBJECT_H
@@ -2561,7 +3966,7 @@ index f00dd7744..5ef1f10aa 100644
  #include "ndarraytypes.h"
  
  /* Includes the "function" C-API -- these are all stored in a
-@@ -26,9 +21,9 @@ extern "C" CONFUSE_EMACS
+@@ -26,9 +21,9 @@
  #include "__multiarray_api.h"
  
  
@@ -2573,7 +3978,7 @@ index f00dd7744..5ef1f10aa 100644
  
  #define PyArray_Check(op) PyObject_TypeCheck(op, &PyArray_Type)
  #define PyArray_CheckExact(op) (((PyObject*)(op))->ob_type == &PyArray_Type)
-@@ -50,13 +45,13 @@ extern "C" CONFUSE_EMACS
+@@ -50,13 +45,13 @@
  
  #define PyArray_CheckScalar(m) (PyArray_IsScalar(m, Generic) ||               \
                                  PyArray_IsZeroDim(m))
@@ -2591,7 +3996,7 @@ index f00dd7744..5ef1f10aa 100644
           PyUnicode_Check(obj))
  
  #define PyArray_IsAnyScalar(obj)                                              \
-@@ -65,10 +60,6 @@ extern "C" CONFUSE_EMACS
+@@ -65,10 +60,6 @@
  #define PyArray_CheckAnyScalar(obj) (PyArray_IsPythonScalar(obj) ||           \
                                       PyArray_CheckScalar(obj))
  
@@ -2602,7 +4007,7 @@ index f00dd7744..5ef1f10aa 100644
  
  #define PyArray_GETCONTIGUOUS(m) (PyArray_ISCONTIGUOUS(m) ?                   \
                                    Py_INCREF(m), (m) :                         \
-@@ -87,7 +78,7 @@ extern "C" CONFUSE_EMACS
+@@ -87,7 +78,7 @@
                                                        NULL)
  
  #define PyArray_FROM_OT(m,type) PyArray_FromAny(m,                            \
@@ -2611,7 +4016,7 @@ index f00dd7744..5ef1f10aa 100644
  
  #define PyArray_FROM_OTF(m, type, flags) \
          PyArray_FromAny(m, PyArray_DescrFromType(type), 0, 0, \
-@@ -107,9 +98,10 @@ extern "C" CONFUSE_EMACS
+@@ -107,9 +98,10 @@
  
  #define PyArray_FILLWBYTE(obj, val) memset(PyArray_DATA(obj), val, \
                                             PyArray_NBYTES(obj))
@@ -2623,7 +4028,7 @@ index f00dd7744..5ef1f10aa 100644
  #define NPY_MAX_ELSIZE (2 * NPY_SIZEOF_LONGDOUBLE)
  
  #define PyArray_ContiguousFromAny(op, type, min_depth, max_depth) \
-@@ -160,16 +152,20 @@ extern "C" CONFUSE_EMACS
+@@ -160,16 +152,20 @@
                                              (k)*PyArray_STRIDES(obj)[2] + \
                                              (l)*PyArray_STRIDES(obj)[3]))
  
@@ -2650,7 +4055,7 @@ index f00dd7744..5ef1f10aa 100644
      }
  }
  
-@@ -218,21 +214,49 @@ PyArray_XDECREF_ERR(PyArrayObject *arr)
+@@ -218,21 +214,49 @@
  /*
     Check to see if this key in the dictionary is the "title"
     entry of the tuple (i.e. a duplicate dictionary entry in the fields
@@ -2709,10 +4114,9 @@ index f00dd7744..5ef1f10aa 100644
  #endif
  
  
-diff --git a/include/numpy/ndarraytypes.h b/include/numpy/ndarraytypes.h
-index 04d037ec8..5b7e8952e 100644
---- a/include/numpy/ndarraytypes.h
-+++ b/include/numpy/ndarraytypes.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/ndarraytypes.h spacy-2.3.2/include/numpy/ndarraytypes.h
+--- spacy-2.3.2-orig/include/numpy/ndarraytypes.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/ndarraytypes.h	2020-11-11 13:37:37.422412633 +0100
 @@ -1,19 +1,12 @@
  #ifndef NDARRAYTYPES_H
  #define NDARRAYTYPES_H
@@ -2752,7 +4156,7 @@ index 04d037ec8..5b7e8952e 100644
  
  /*
   * There are several places in the code where an array of dimensions
-@@ -78,12 +81,15 @@ enum NPY_TYPES {    NPY_BOOL=0,
+@@ -78,12 +81,15 @@
  
                      NPY_NTYPES,
                      NPY_NOTYPE,
@@ -2769,7 +4173,7 @@ index 04d037ec8..5b7e8952e 100644
  
  /* basetype array priority */
  #define NPY_PRIORITY 0.0
-@@ -150,12 +156,26 @@ enum NPY_TYPECHAR {
+@@ -150,12 +156,26 @@
          NPY_COMPLEXLTR = 'c'
  };
  
@@ -2798,7 +4202,7 @@ index 04d037ec8..5b7e8952e 100644
  
  
  typedef enum {
-@@ -199,13 +219,7 @@ typedef enum {
+@@ -199,13 +219,7 @@
          /* Allow safe casts or casts within the same kind */
          NPY_SAME_KIND_CASTING=3,
          /* Allow any casts */
@@ -2813,7 +4217,7 @@ index 04d037ec8..5b7e8952e 100644
  } NPY_CASTING;
  
  typedef enum {
-@@ -229,29 +243,34 @@ typedef enum {
+@@ -229,29 +243,34 @@
   *   TIMEZONE: 5
   *   NULL TERMINATOR: 1
   */
@@ -2864,7 +4268,7 @@ index 04d037ec8..5b7e8952e 100644
   */
  #define NPY_DATETIME_NUMUNITS (NPY_FR_GENERIC + 1)
  #define NPY_DATETIME_DEFAULTUNIT NPY_FR_GENERIC
-@@ -334,10 +353,12 @@ struct NpyAuxData_tag {
+@@ -334,10 +353,12 @@
  
  #define NPY_USE_PYMEM 1
  
@@ -2880,7 +4284,7 @@ index 04d037ec8..5b7e8952e 100644
  #else
  #define PyArray_malloc malloc
  #define PyArray_free free
-@@ -394,6 +415,12 @@ typedef int (PyArray_FillFunc)(void *, npy_intp, void *);
+@@ -394,6 +415,12 @@
  
  typedef int (PyArray_SortFunc)(void *, npy_intp, void *);
  typedef int (PyArray_ArgSortFunc)(void *, npy_intp *, npy_intp, void *);
@@ -2893,7 +4297,7 @@ index 04d037ec8..5b7e8952e 100644
  
  typedef int (PyArray_FillWithScalarFunc)(void *, npy_intp, void *, void *);
  
-@@ -477,7 +504,8 @@ typedef struct {
+@@ -477,7 +504,8 @@
          PyArray_NonzeroFunc *nonzero;
  
          /*
@@ -2903,7 +4307,7 @@ index 04d037ec8..5b7e8952e 100644
           * Can be NULL.
           */
          PyArray_FillFunc *fill;
-@@ -616,6 +644,10 @@ typedef struct _PyArray_Descr {
+@@ -616,6 +644,10 @@
           * for NumPy 1.7.0.
           */
          NpyAuxData *c_metadata;
@@ -2914,7 +4318,7 @@ index 04d037ec8..5b7e8952e 100644
  } PyArray_Descr;
  
  typedef struct _arr_descr {
-@@ -630,8 +662,8 @@ typedef struct _arr_descr {
+@@ -630,8 +662,8 @@
   * (PyArray_DATA and friends) to access fields here for a number of
   * releases. Direct access to the members themselves is deprecated.
   * To ensure that your code does not use deprecated access,
@@ -2925,7 +4329,7 @@ index 04d037ec8..5b7e8952e 100644
   */
  /* This struct will be moved to a private header in a future release */
  typedef struct tagPyArrayObject_fields {
-@@ -650,7 +682,7 @@ typedef struct tagPyArrayObject_fields {
+@@ -650,7 +682,7 @@
      /*
       * This object is decref'd upon
       * deletion of array. Except in the
@@ -2934,7 +4338,7 @@ index 04d037ec8..5b7e8952e 100644
       * special handling.
       *
       * For views it points to the original
-@@ -658,12 +690,12 @@ typedef struct tagPyArrayObject_fields {
+@@ -658,12 +690,12 @@
       * views occur.
       *
       * For creation from buffer object it
@@ -2951,7 +4355,7 @@ index 04d037ec8..5b7e8952e 100644
       */
      PyObject *base;
      /* Pointer to type structure */
-@@ -678,7 +710,8 @@ typedef struct tagPyArrayObject_fields {
+@@ -678,7 +710,8 @@
   * To hide the implementation details, we only expose
   * the Python struct HEAD.
   */
@@ -2961,7 +4365,7 @@ index 04d037ec8..5b7e8952e 100644
  /*
   * Can't put this in npy_deprecated_api.h like the others.
   * PyArrayObject field access is deprecated as of NumPy 1.7.
-@@ -757,7 +790,14 @@ typedef int (PyArray_FinalizeFunc)(PyArrayObject *, PyObject *);
+@@ -757,7 +790,14 @@
  
  /*
   * Note: all 0-d arrays are C_CONTIGUOUS and F_CONTIGUOUS. If a
@@ -2977,7 +4381,7 @@ index 04d037ec8..5b7e8952e 100644
   */
  
  /*
-@@ -770,7 +810,7 @@ typedef int (PyArray_FinalizeFunc)(PyArrayObject *, PyObject *);
+@@ -770,7 +810,7 @@
  
  /*
   * An array never has the next four set; they're only used as parameter
@@ -2986,7 +4390,7 @@ index 04d037ec8..5b7e8952e 100644
   *
   * This flag may be requested in constructor functions.
   */
-@@ -802,7 +842,7 @@ typedef int (PyArray_FinalizeFunc)(PyArrayObject *, PyObject *);
+@@ -802,7 +842,7 @@
  #define NPY_ARRAY_ELEMENTSTRIDES  0x0080
  
  /*
@@ -2995,7 +4399,7 @@ index 04d037ec8..5b7e8952e 100644
   * stored according to how the compiler would align things (e.g., an
   * array of integers (4 bytes each) starts on a memory address that's
   * a multiple of 4)
-@@ -830,12 +870,13 @@ typedef int (PyArray_FinalizeFunc)(PyArrayObject *, PyObject *);
+@@ -830,12 +870,13 @@
  /*
   * If this flag is set, then base contains a pointer to an array of
   * the same size that should be updated with the current contents of
@@ -3011,7 +4415,7 @@ index 04d037ec8..5b7e8952e 100644
  
  /*
   * NOTE: there are also internal flags defined in multiarray/arrayobject.h,
-@@ -860,10 +901,14 @@ typedef int (PyArray_FinalizeFunc)(PyArrayObject *, PyObject *);
+@@ -860,10 +901,14 @@
  #define NPY_ARRAY_OUT_ARRAY    (NPY_ARRAY_CARRAY)
  #define NPY_ARRAY_INOUT_ARRAY  (NPY_ARRAY_CARRAY | \
                                  NPY_ARRAY_UPDATEIFCOPY)
@@ -3026,7 +4430,7 @@ index 04d037ec8..5b7e8952e 100644
  
  #define NPY_ARRAY_UPDATE_ALL   (NPY_ARRAY_C_CONTIGUOUS | \
                                  NPY_ARRAY_F_CONTIGUOUS | \
-@@ -904,26 +949,30 @@ typedef int (PyArray_FinalizeFunc)(PyArrayObject *, PyObject *);
+@@ -904,26 +949,30 @@
   */
  
  
@@ -3066,7 +4470,7 @@ index 04d037ec8..5b7e8952e 100644
                  NPY_END_THREADS; } while (0);
  
  #define NPY_ALLOW_C_API_DEF  PyGILState_STATE __save__;
-@@ -932,9 +981,9 @@ typedef int (PyArray_FinalizeFunc)(PyArrayObject *, PyObject *);
+@@ -932,9 +981,9 @@
  #else
  #define NPY_BEGIN_ALLOW_THREADS
  #define NPY_END_ALLOW_THREADS
@@ -3077,7 +4481,7 @@ index 04d037ec8..5b7e8952e 100644
  #define NPY_BEGIN_THREADS_DESCR(dtype)
  #define NPY_END_THREADS_DESCR(dtype)
  #define NPY_ALLOW_C_API_DEF
-@@ -982,6 +1031,12 @@ typedef void (NpyIter_GetMultiIndexFunc)(NpyIter *iter,
+@@ -982,6 +1031,12 @@
  #define NPY_ITER_DELAY_BUFALLOC             0x00000800
  /* When NPY_KEEPORDER is specified, disable reversing negative-stride axes */
  #define NPY_ITER_DONT_NEGATE_STRIDES        0x00001000
@@ -3090,7 +4494,7 @@ index 04d037ec8..5b7e8952e 100644
  
  /*** Per-operand flags that may be passed to the iterator constructors ***/
  
-@@ -999,7 +1054,7 @@ typedef void (NpyIter_GetMultiIndexFunc)(NpyIter *iter,
+@@ -999,7 +1054,7 @@
  #define NPY_ITER_CONTIG                     0x00200000
  /* The operand may be copied to satisfy requirements */
  #define NPY_ITER_COPY                       0x00400000
@@ -3099,7 +4503,7 @@ index 04d037ec8..5b7e8952e 100644
  #define NPY_ITER_UPDATEIFCOPY               0x00800000
  /* Allocate the operand if it is NULL */
  #define NPY_ITER_ALLOCATE                   0x01000000
-@@ -1013,6 +1068,8 @@ typedef void (NpyIter_GetMultiIndexFunc)(NpyIter *iter,
+@@ -1013,6 +1068,8 @@
  #define NPY_ITER_WRITEMASKED                0x10000000
  /* This array is the mask for all WRITEMASKED operands */
  #define NPY_ITER_ARRAYMASK                  0x20000000
@@ -3108,7 +4512,7 @@ index 04d037ec8..5b7e8952e 100644
  
  #define NPY_ITER_GLOBAL_FLAGS               0x0000ffff
  #define NPY_ITER_PER_OP_FLAGS               0xffff0000
-@@ -1029,7 +1086,8 @@ typedef struct PyArrayIterObject_tag PyArrayIterObject;
+@@ -1029,7 +1086,8 @@
   * type of the function which translates a set of coordinates to a
   * pointer to the data
   */
@@ -3118,7 +4522,7 @@ index 04d037ec8..5b7e8952e 100644
  
  struct PyArrayIterObject_tag {
          PyObject_HEAD
-@@ -1052,7 +1110,7 @@ struct PyArrayIterObject_tag {
+@@ -1052,7 +1110,7 @@
  
  
  /* Iterator API */
@@ -3127,7 +4531,7 @@ index 04d037ec8..5b7e8952e 100644
  
  #define _PyAIT(it) ((PyArrayIterObject *)(it))
  #define PyArray_ITER_RESET(it) do { \
-@@ -1080,27 +1138,6 @@ struct PyArrayIterObject_tag {
+@@ -1080,27 +1138,6 @@
          } \
  } while (0)
  
@@ -3155,7 +4559,7 @@ index 04d037ec8..5b7e8952e 100644
  #define PyArray_ITER_NEXT(it) do { \
          _PyAIT(it)->index++; \
          if (_PyAIT(it)->nd_m1 == 0) { \
-@@ -1151,7 +1188,7 @@ struct PyArrayIterObject_tag {
+@@ -1151,7 +1188,7 @@
  
  #define PyArray_ITER_GOTO1D(it, ind) do { \
          int __npy_i; \
@@ -3164,7 +4568,7 @@ index 04d037ec8..5b7e8952e 100644
          if (__npy_ind < 0) __npy_ind += _PyAIT(it)->size; \
          _PyAIT(it)->index = __npy_ind; \
          if (_PyAIT(it)->nd_m1 == 0) { \
-@@ -1235,8 +1272,12 @@ typedef struct {
+@@ -1235,8 +1272,12 @@
  #define PyArray_MultiIter_NOTDONE(multi)                \
          (_PyMIT(multi)->index < _PyMIT(multi)->size)
  
@@ -3178,7 +4582,7 @@ index 04d037ec8..5b7e8952e 100644
  typedef struct {
          PyObject_HEAD
          /*
-@@ -1251,29 +1292,71 @@ typedef struct {
+@@ -1251,29 +1292,71 @@
          npy_intp              index;                   /* current index */
          int                   nd;                      /* number of dims */
          npy_intp              dimensions[NPY_MAXDIMS]; /* dimensions */
@@ -3261,7 +4665,7 @@ index 04d037ec8..5b7e8952e 100644
  } PyArrayMapIterObject;
  
  enum {
-@@ -1365,17 +1448,16 @@ PyArrayNeighborhoodIter_Next2D(PyArrayNeighborhoodIterObject* iter);
+@@ -1365,17 +1448,16 @@
   * checking of correctness when working with these objects in C.
   */
  
@@ -3283,7 +4687,7 @@ index 04d037ec8..5b7e8952e 100644
  /*
   * Changing access macros into functions, to allow for future hiding
   * of the internal memory layout. This later hiding will allow the 2.x series
-@@ -1425,13 +1507,13 @@ PyArray_STRIDE(const PyArrayObject *arr, int istride)
+@@ -1425,13 +1507,13 @@
      return ((PyArrayObject_fields *)arr)->strides[istride];
  }
  
@@ -3299,7 +4703,7 @@ index 04d037ec8..5b7e8952e 100644
  PyArray_DESCR(PyArrayObject *arr)
  {
      return ((PyArrayObject_fields *)arr)->descr;
-@@ -1588,7 +1670,7 @@ PyArray_CLEARFLAGS(PyArrayObject *arr, int flags)
+@@ -1588,7 +1670,7 @@
  #define PyTypeNum_ISOBJECT(type) ((type) == NPY_OBJECT)
  
  
@@ -3308,7 +4712,7 @@ index 04d037ec8..5b7e8952e 100644
  #define PyDataType_ISUNSIGNED(obj) PyTypeNum_ISUNSIGNED(((PyArray_Descr*)(obj))->type_num)
  #define PyDataType_ISSIGNED(obj) PyTypeNum_ISSIGNED(((PyArray_Descr*)(obj))->type_num)
  #define PyDataType_ISINTEGER(obj) PyTypeNum_ISINTEGER(((PyArray_Descr*)(obj))->type_num )
-@@ -1604,6 +1686,9 @@ PyArray_CLEARFLAGS(PyArrayObject *arr, int flags)
+@@ -1604,6 +1686,9 @@
  #define PyDataType_ISOBJECT(obj) PyTypeNum_ISOBJECT(((PyArray_Descr*)(obj))->type_num)
  #define PyDataType_HASFIELDS(obj) (((PyArray_Descr *)(obj))->names != NULL)
  #define PyDataType_HASSUBARRAY(dtype) ((dtype)->subarray != NULL)
@@ -3318,7 +4722,7 @@ index 04d037ec8..5b7e8952e 100644
  
  #define PyArray_ISBOOL(obj) PyTypeNum_ISBOOL(PyArray_TYPE(obj))
  #define PyArray_ISUNSIGNED(obj) PyTypeNum_ISUNSIGNED(PyArray_TYPE(obj))
-@@ -1675,7 +1760,7 @@ typedef struct {
+@@ -1675,7 +1760,7 @@
  /************************************************************
   * This is the form of the struct that's returned pointed by the
   * PyCObject attribute of an array __array_struct__. See
@@ -3327,7 +4731,7 @@ index 04d037ec8..5b7e8952e 100644
   * documentation.
   ************************************************************/
  typedef struct {
-@@ -1724,8 +1809,30 @@ typedef struct {
+@@ -1724,8 +1809,30 @@
  typedef void (PyDataMem_EventHookFunc)(void *inp, void *outp, size_t size,
                                         void *user_data);
  
@@ -3360,10 +4764,9 @@ index 04d037ec8..5b7e8952e 100644
 +#undef NPY_DEPRECATED_INCLUDES
  
  #endif /* NPY_ARRAYTYPES_H */
-diff --git a/include/numpy/noprefix.h b/include/numpy/noprefix.h
-index b3e57480e..041f30192 100644
---- a/include/numpy/noprefix.h
-+++ b/include/numpy/noprefix.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/noprefix.h spacy-2.3.2/include/numpy/noprefix.h
+--- spacy-2.3.2-orig/include/numpy/noprefix.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/noprefix.h	2020-11-11 13:37:37.422412633 +0100
 @@ -64,10 +64,13 @@
  #define datetime    npy_datetime
  #define timedelta   npy_timedelta
@@ -3410,10 +4813,139 @@ index b3e57480e..041f30192 100644
 +#endif
  
  #endif
-diff --git a/include/numpy/npy_3kcompat.h b/include/numpy/npy_3kcompat.h
-index d0cd9ac1a..798da6957 100644
---- a/include/numpy/npy_3kcompat.h
-+++ b/include/numpy/npy_3kcompat.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/npy_1_7_deprecated_api.h spacy-2.3.2/include/numpy/npy_1_7_deprecated_api.h
+--- spacy-2.3.2-orig/include/numpy/npy_1_7_deprecated_api.h	1970-01-01 01:00:00.000000000 +0100
++++ spacy-2.3.2/include/numpy/npy_1_7_deprecated_api.h	2020-11-11 13:37:37.422412633 +0100
+@@ -0,0 +1,126 @@
++#ifndef _NPY_1_7_DEPRECATED_API_H
++#define _NPY_1_7_DEPRECATED_API_H
++
++#ifndef NPY_DEPRECATED_INCLUDES
++#error "Should never include npy_*_*_deprecated_api directly."
++#endif
++
++/* Emit a warning if the user did not specifically request the old API */
++#ifndef NPY_NO_DEPRECATED_API
++#if defined(_WIN32)
++#define _WARN___STR2__(x) #x
++#define _WARN___STR1__(x) _WARN___STR2__(x)
++#define _WARN___LOC__ __FILE__ "(" _WARN___STR1__(__LINE__) ") : Warning Msg: "
++#pragma message(_WARN___LOC__"Using deprecated NumPy API, disable it with " \
++                         "#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION")
++#elif defined(__GNUC__)
++#warning "Using deprecated NumPy API, disable it with " \
++         "#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION"
++#endif
++/* TODO: How to do this warning message for other compilers? */
++#endif
++
++/*
++ * This header exists to collect all dangerous/deprecated NumPy API
++ * as of NumPy 1.7.
++ *
++ * This is an attempt to remove bad API, the proliferation of macros,
++ * and namespace pollution currently produced by the NumPy headers.
++ */
++
++/* These array flags are deprecated as of NumPy 1.7 */
++#define NPY_CONTIGUOUS NPY_ARRAY_C_CONTIGUOUS
++#define NPY_FORTRAN NPY_ARRAY_F_CONTIGUOUS
++
++/*
++ * The consistent NPY_ARRAY_* names which don't pollute the NPY_*
++ * namespace were added in NumPy 1.7.
++ *
++ * These versions of the carray flags are deprecated, but
++ * probably should only be removed after two releases instead of one.
++ */
++#define NPY_C_CONTIGUOUS   NPY_ARRAY_C_CONTIGUOUS
++#define NPY_F_CONTIGUOUS   NPY_ARRAY_F_CONTIGUOUS
++#define NPY_OWNDATA        NPY_ARRAY_OWNDATA
++#define NPY_FORCECAST      NPY_ARRAY_FORCECAST
++#define NPY_ENSURECOPY     NPY_ARRAY_ENSURECOPY
++#define NPY_ENSUREARRAY    NPY_ARRAY_ENSUREARRAY
++#define NPY_ELEMENTSTRIDES NPY_ARRAY_ELEMENTSTRIDES
++#define NPY_ALIGNED        NPY_ARRAY_ALIGNED
++#define NPY_NOTSWAPPED     NPY_ARRAY_NOTSWAPPED
++#define NPY_WRITEABLE      NPY_ARRAY_WRITEABLE
++#define NPY_UPDATEIFCOPY   NPY_ARRAY_UPDATEIFCOPY
++#define NPY_BEHAVED        NPY_ARRAY_BEHAVED
++#define NPY_BEHAVED_NS     NPY_ARRAY_BEHAVED_NS
++#define NPY_CARRAY         NPY_ARRAY_CARRAY
++#define NPY_CARRAY_RO      NPY_ARRAY_CARRAY_RO
++#define NPY_FARRAY         NPY_ARRAY_FARRAY
++#define NPY_FARRAY_RO      NPY_ARRAY_FARRAY_RO
++#define NPY_DEFAULT        NPY_ARRAY_DEFAULT
++#define NPY_IN_ARRAY       NPY_ARRAY_IN_ARRAY
++#define NPY_OUT_ARRAY      NPY_ARRAY_OUT_ARRAY
++#define NPY_INOUT_ARRAY    NPY_ARRAY_INOUT_ARRAY
++#define NPY_IN_FARRAY      NPY_ARRAY_IN_FARRAY
++#define NPY_OUT_FARRAY     NPY_ARRAY_OUT_FARRAY
++#define NPY_INOUT_FARRAY   NPY_ARRAY_INOUT_FARRAY
++#define NPY_UPDATE_ALL     NPY_ARRAY_UPDATE_ALL
++
++/* This way of accessing the default type is deprecated as of NumPy 1.7 */
++#define PyArray_DEFAULT NPY_DEFAULT_TYPE
++
++/* These DATETIME bits aren't used internally */
++#define PyDataType_GetDatetimeMetaData(descr)                                 \
++    ((descr->metadata == NULL) ? NULL :                                       \
++        ((PyArray_DatetimeMetaData *)(PyCapsule_GetPointer(                   \
++                PyDict_GetItemString(                                         \
++                    descr->metadata, NPY_METADATA_DTSTR), NULL))))
++
++/*
++ * Deprecated as of NumPy 1.7, this kind of shortcut doesn't
++ * belong in the public API.
++ */
++#define NPY_AO PyArrayObject
++
++/*
++ * Deprecated as of NumPy 1.7, an all-lowercase macro doesn't
++ * belong in the public API.
++ */
++#define fortran fortran_
++
++/*
++ * Deprecated as of NumPy 1.7, as it is a namespace-polluting
++ * macro.
++ */
++#define FORTRAN_IF PyArray_FORTRAN_IF
++
++/* Deprecated as of NumPy 1.7, datetime64 uses c_metadata instead */
++#define NPY_METADATA_DTSTR "__timeunit__"
++
++/*
++ * Deprecated as of NumPy 1.7.
++ * The reasoning:
++ *  - These are for datetime, but there's no datetime "namespace".
++ *  - They just turn NPY_STR_<x> into "<x>", which is just
++ *    making something simple be indirected.
++ */
++#define NPY_STR_Y "Y"
++#define NPY_STR_M "M"
++#define NPY_STR_W "W"
++#define NPY_STR_D "D"
++#define NPY_STR_h "h"
++#define NPY_STR_m "m"
++#define NPY_STR_s "s"
++#define NPY_STR_ms "ms"
++#define NPY_STR_us "us"
++#define NPY_STR_ns "ns"
++#define NPY_STR_ps "ps"
++#define NPY_STR_fs "fs"
++#define NPY_STR_as "as"
++
++/*
++ * The macros in old_defines.h are Deprecated as of NumPy 1.7 and will be
++ * removed in the next major release.
++ */
++#include "old_defines.h"
++
++#endif
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/npy_3kcompat.h spacy-2.3.2/include/numpy/npy_3kcompat.h
+--- spacy-2.3.2-orig/include/numpy/npy_3kcompat.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/npy_3kcompat.h	2020-11-11 13:37:37.426412820 +0100
 @@ -13,11 +13,9 @@
  #include <Python.h>
  #include <stdio.h>
@@ -3426,7 +4958,7 @@ index d0cd9ac1a..798da6957 100644
  
  #include "numpy/npy_common.h"
  #include "numpy/ndarrayobject.h"
-@@ -45,6 +43,7 @@ static NPY_INLINE int PyInt_Check(PyObject *op) {
+@@ -45,6 +43,7 @@
  #define PyInt_AsLong PyLong_AsLong
  #define PyInt_AS_LONG PyLong_AsLong
  #define PyInt_AsSsize_t PyLong_AsSsize_t
@@ -3434,7 +4966,7 @@ index d0cd9ac1a..798da6957 100644
  
  /* NOTE:
   *
-@@ -53,6 +52,50 @@ static NPY_INLINE int PyInt_Check(PyObject *op) {
+@@ -53,6 +52,50 @@
   */
  #endif /* NPY_PY3K */
  
@@ -3485,7 +5017,7 @@ index d0cd9ac1a..798da6957 100644
  /*
   * PyString -> PyBytes
   */
-@@ -86,6 +129,8 @@ static NPY_INLINE int PyInt_Check(PyObject *op) {
+@@ -86,6 +129,8 @@
  #define PyUString_InternFromString PyUnicode_InternFromString
  #define PyUString_Format PyUnicode_Format
  
@@ -3494,7 +5026,7 @@ index d0cd9ac1a..798da6957 100644
  #else
  
  #define PyBytes_Type PyString_Type
-@@ -115,43 +160,46 @@ static NPY_INLINE int PyInt_Check(PyObject *op) {
+@@ -115,43 +160,46 @@
  #define PyUString_InternFromString PyString_InternFromString
  #define PyUString_Format PyString_Format
  
@@ -3554,7 +5086,7 @@ index d0cd9ac1a..798da6957 100644
      /* Flush first to ensure things end up in the file in the correct order */
      ret = PyObject_CallMethod(file, "flush", "");
      if (ret == NULL) {
-@@ -162,6 +210,11 @@ npy_PyFile_Dup(PyObject *file, char *mode)
+@@ -162,6 +210,11 @@
      if (fd == -1) {
          return NULL;
      }
@@ -3566,7 +5098,7 @@ index d0cd9ac1a..798da6957 100644
      os = PyImport_ImportModule("os");
      if (os == NULL) {
          return NULL;
-@@ -173,6 +226,8 @@ npy_PyFile_Dup(PyObject *file, char *mode)
+@@ -173,6 +226,8 @@
      }
      fd2 = PyNumber_AsSsize_t(ret, NULL);
      Py_DECREF(ret);
@@ -3575,7 +5107,7 @@ index d0cd9ac1a..798da6957 100644
  #ifdef _WIN32
      handle = _fdopen(fd2, mode);
  #else
-@@ -181,19 +236,55 @@ npy_PyFile_Dup(PyObject *file, char *mode)
+@@ -181,19 +236,55 @@
      if (handle == NULL) {
          PyErr_SetString(PyExc_IOError,
                          "Getting a FILE* from a Python file object failed");
@@ -3633,7 +5165,7 @@ index d0cd9ac1a..798da6957 100644
      return handle;
  }
  
-@@ -201,14 +292,65 @@ npy_PyFile_Dup(PyObject *file, char *mode)
+@@ -201,14 +292,65 @@
   * Close the dup-ed file handle, and seek the Python one to the current position
   */
  static NPY_INLINE int
@@ -3703,7 +5235,7 @@ index d0cd9ac1a..798da6957 100644
      if (ret == NULL) {
          return -1;
      }
-@@ -220,6 +362,12 @@ static NPY_INLINE int
+@@ -220,6 +362,12 @@
  npy_PyFile_Check(PyObject *file)
  {
      int fd;
@@ -3716,7 +5248,7 @@ index d0cd9ac1a..798da6957 100644
      fd = PyObject_AsFileDescriptor(file);
      if (fd == -1) {
          PyErr_Clear();
-@@ -228,14 +376,6 @@ npy_PyFile_Check(PyObject *file)
+@@ -228,14 +376,6 @@
      return 1;
  }
  
@@ -3731,7 +5263,7 @@ index d0cd9ac1a..798da6957 100644
  static NPY_INLINE PyObject*
  npy_PyFile_OpenFile(PyObject *filename, const char *mode)
  {
-@@ -260,6 +400,68 @@ npy_PyFile_CloseFile(PyObject *file)
+@@ -260,6 +400,68 @@
      return 0;
  }
  
@@ -3800,7 +5332,7 @@ index d0cd9ac1a..798da6957 100644
  /*
   * PyObject_Cmp
   */
-@@ -269,7 +471,7 @@ PyObject_Cmp(PyObject *i1, PyObject *i2, int *cmp)
+@@ -269,7 +471,7 @@
  {
      int v;
      v = PyObject_RichCompareBool(i1, i2, Py_LT);
@@ -3809,7 +5341,7 @@ index d0cd9ac1a..798da6957 100644
          *cmp = -1;
          return 1;
      }
-@@ -278,7 +480,7 @@ PyObject_Cmp(PyObject *i1, PyObject *i2, int *cmp)
+@@ -278,7 +480,7 @@
      }
  
      v = PyObject_RichCompareBool(i1, i2, Py_GT);
@@ -3818,7 +5350,7 @@ index d0cd9ac1a..798da6957 100644
          *cmp = 1;
          return 1;
      }
-@@ -287,7 +489,7 @@ PyObject_Cmp(PyObject *i1, PyObject *i2, int *cmp)
+@@ -287,7 +489,7 @@
      }
  
      v = PyObject_RichCompareBool(i1, i2, Py_EQ);
@@ -3827,7 +5359,7 @@ index d0cd9ac1a..798da6957 100644
          *cmp = 0;
          return 1;
      }
-@@ -304,8 +506,6 @@ PyObject_Cmp(PyObject *i1, PyObject *i2, int *cmp)
+@@ -304,8 +506,6 @@
   * The main job here is to get rid of the improved error handling
   * of PyCapsules. It's a shame...
   */
@@ -3836,7 +5368,7 @@ index d0cd9ac1a..798da6957 100644
  static NPY_INLINE PyObject *
  NpyCapsule_FromVoidPtr(void *ptr, void (*dtor)(PyObject *))
  {
-@@ -350,68 +550,9 @@ NpyCapsule_Check(PyObject *ptr)
+@@ -350,68 +550,9 @@
      return PyCapsule_CheckExact(ptr);
  }
  
@@ -3906,10 +5438,9 @@ index d0cd9ac1a..798da6957 100644
  
 +
  #endif /* _NPY_3KCOMPAT_H_ */
-diff --git a/include/numpy/npy_common.h b/include/numpy/npy_common.h
-index 7fca7e220..c2e755958 100644
---- a/include/numpy/npy_common.h
-+++ b/include/numpy/npy_common.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/npy_common.h spacy-2.3.2/include/numpy/npy_common.h
+--- spacy-2.3.2-orig/include/numpy/npy_common.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/npy_common.h	2020-11-11 13:37:37.426412820 +0100
 @@ -3,27 +3,213 @@
  
  /* numpconfig.h is auto-generated */
@@ -4063,15 +5594,15 @@ index 7fca7e220..c2e755958 100644
 +#ifdef WITH_CPYCHECKER_RETURNS_BORROWED_REF_ATTRIBUTE
 +  #define NPY_RETURNS_BORROWED_REF \
 +    __attribute__((cpychecker_returns_borrowed_ref))
- #else
--        #define NPY_INLINE
++#else
 +  #define NPY_RETURNS_BORROWED_REF
 +#endif
 +
 +#ifdef WITH_CPYCHECKER_STEALS_REFERENCE_TO_ARG_ATTRIBUTE
 +  #define NPY_STEALS_REF_TO_ARG(n) \
 +   __attribute__((cpychecker_steals_reference_to_arg(n)))
-+#else
+ #else
+-        #define NPY_INLINE
 + #define NPY_STEALS_REF_TO_ARG(n)
 +#endif
 +
@@ -4132,7 +5663,7 @@ index 7fca7e220..c2e755958 100644
  
  /* enums for detected endianness */
  enum {
-@@ -33,15 +219,22 @@ enum {
+@@ -33,15 +219,22 @@
  };
  
  /*
@@ -4157,7 +5688,7 @@ index 7fca7e220..c2e755958 100644
  #define NPY_SIZEOF_CFLOAT NPY_SIZEOF_COMPLEX_FLOAT
  #define NPY_SIZEOF_CDOUBLE NPY_SIZEOF_COMPLEX_DOUBLE
  #define NPY_SIZEOF_CLONGDOUBLE NPY_SIZEOF_COMPLEX_LONGDOUBLE
-@@ -50,18 +243,8 @@ typedef Py_uintptr_t npy_uintp;
+@@ -50,18 +243,8 @@
  #undef constchar
  #endif
  
@@ -4176,7 +5707,7 @@ index 7fca7e220..c2e755958 100644
  
  /* NPY_INTP_FMT Note:
   *      Unlike the other NPY_*_FMT macros which are used with
-@@ -69,10 +252,6 @@ typedef Py_uintptr_t npy_uintp;
+@@ -69,10 +252,6 @@
   *      PyString_Format. These functions use different formatting
   *      codes which are portably specified according to the Python
   *      documentation. See ticket #1795.
@@ -4187,7 +5718,7 @@ index 7fca7e220..c2e755958 100644
   */
  #if NPY_SIZEOF_PY_INTPTR_T == NPY_SIZEOF_INT
          #define NPY_INTP NPY_INT
-@@ -100,11 +279,7 @@ typedef Py_uintptr_t npy_uintp;
+@@ -100,11 +279,7 @@
          #define NPY_MAX_INTP NPY_MAX_LONGLONG
          #define NPY_MIN_INTP NPY_MIN_LONGLONG
          #define NPY_MAX_UINTP NPY_MAX_ULONGLONG
@@ -4199,7 +5730,7 @@ index 7fca7e220..c2e755958 100644
  #endif
  
  /*
-@@ -143,18 +318,9 @@ typedef unsigned PY_LONG_LONG npy_ulonglong;
+@@ -143,18 +318,9 @@
  #  ifdef _MSC_VER
  #    define NPY_LONGLONG_FMT         "I64d"
  #    define NPY_ULONGLONG_FMT        "I64u"
@@ -4219,7 +5750,7 @@ index 7fca7e220..c2e755958 100644
  #  endif
  #  ifdef _MSC_VER
  #    define NPY_LONGLONG_SUFFIX(x)   (x##i64)
-@@ -203,6 +369,9 @@ typedef long npy_long;
+@@ -203,6 +369,9 @@
  typedef float npy_float;
  typedef double npy_double;
  
@@ -4229,7 +5760,7 @@ index 7fca7e220..c2e755958 100644
  /*
   * Disabling C99 complex usage: a lot of C code in numpy/scipy rely on being
   * able to do .real/.imag. Will have to convert code first.
-@@ -228,21 +397,21 @@ typedef struct {npy_longdouble real, imag;} npy_clongdouble;
+@@ -228,21 +397,21 @@
  #endif
  #if NPY_SIZEOF_COMPLEX_DOUBLE != 2 * NPY_SIZEOF_DOUBLE
  #error npy_cdouble definition is not compatible with C99 complex definition ! \
@@ -4254,7 +5785,7 @@ index 7fca7e220..c2e755958 100644
          compiler and platform
  #endif
  typedef struct { npy_longdouble real, imag; } npy_clongdouble;
-@@ -305,10 +474,6 @@ typedef struct { npy_longdouble real, imag; } npy_clongdouble;
+@@ -305,10 +474,6 @@
  #define NPY_MIN_LONG  LONG_MIN
  #define NPY_MAX_ULONG  ULONG_MAX
  
@@ -4265,15 +5796,14 @@ index 7fca7e220..c2e755958 100644
  #define NPY_BITSOF_BOOL (sizeof(npy_bool) * CHAR_BIT)
  #define NPY_BITSOF_CHAR CHAR_BIT
  #define NPY_BITSOF_BYTE (NPY_SIZEOF_BYTE * CHAR_BIT)
-@@ -927,4 +1092,3 @@ typedef npy_int64 npy_datetime;
+@@ -927,4 +1092,3 @@
  /* End of typedefs for numarray style bit-width names */
  
  #endif
 -
-diff --git a/include/numpy/npy_cpu.h b/include/numpy/npy_cpu.h
-index 9707a7adf..509e23a51 100644
---- a/include/numpy/npy_cpu.h
-+++ b/include/numpy/npy_cpu.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/npy_cpu.h spacy-2.3.2/include/numpy/npy_cpu.h
+--- spacy-2.3.2-orig/include/numpy/npy_cpu.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/npy_cpu.h	2020-11-11 13:37:37.422412633 +0100
 @@ -5,6 +5,7 @@
   *              NPY_CPU_AMD64
   *              NPY_CPU_PPC
@@ -4415,10 +5945,9 @@ index 9707a7adf..509e23a51 100644
  #endif
  
  #endif
-diff --git a/include/numpy/npy_endian.h b/include/numpy/npy_endian.h
-index 4e3349ffe..aa367a002 100644
---- a/include/numpy/npy_endian.h
-+++ b/include/numpy/npy_endian.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/npy_endian.h spacy-2.3.2/include/numpy/npy_endian.h
+--- spacy-2.3.2-orig/include/numpy/npy_endian.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/npy_endian.h	2020-11-11 13:37:37.426412820 +0100
 @@ -6,37 +6,64 @@
   * endian.h
   */
@@ -4505,10 +6034,9 @@ index 4e3349ffe..aa367a002 100644
          #define NPY_BYTE_ORDER NPY_BIG_ENDIAN
      #else
          #error Unknown CPU: can not set endianness
-diff --git a/include/numpy/npy_interrupt.h b/include/numpy/npy_interrupt.h
-index f71fd689e..bcb539326 100644
---- a/include/numpy/npy_interrupt.h
-+++ b/include/numpy/npy_interrupt.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/npy_interrupt.h spacy-2.3.2/include/numpy/npy_interrupt.h
+--- spacy-2.3.2-orig/include/numpy/npy_interrupt.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/npy_interrupt.h	2020-11-11 13:37:37.422412633 +0100
 @@ -1,79 +1,18 @@
 -
 -/* Signal handling:
@@ -4604,10 +6132,9 @@ index f71fd689e..bcb539326 100644
  
  #ifndef NPY_INTERRUPT_H
  #define NPY_INTERRUPT_H
-diff --git a/include/numpy/npy_math.h b/include/numpy/npy_math.h
-index 7ae166e54..a07f49501 100644
---- a/include/numpy/npy_math.h
-+++ b/include/numpy/npy_math.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/npy_math.h spacy-2.3.2/include/numpy/npy_math.h
+--- spacy-2.3.2-orig/include/numpy/npy_math.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/npy_math.h	2020-11-11 13:37:37.422412633 +0100
 @@ -1,12 +1,28 @@
  #ifndef __NPY_MATH_C99_H_
  #define __NPY_MATH_C99_H_
@@ -4637,7 +6164,7 @@ index 7ae166e54..a07f49501 100644
  /*
   * NAN and INFINITY like macros (same behavior as glibc for NAN, same as C99
   * for INFINITY)
-@@ -79,7 +95,7 @@ NPY_INLINE static float __npy_nzerof(void)
+@@ -79,7 +95,7 @@
  #define NPY_PI_4f     0.785398163397448309615660845819875721F /* pi/4 */
  #define NPY_1_PIf     0.318309886183790671537767526745028724F /* 1/pi */
  #define NPY_2_PIf     0.636619772367581343075535053490057448F /* 2/pi */
@@ -4646,7 +6173,7 @@ index 7ae166e54..a07f49501 100644
  #define NPY_SQRT2f    1.414213562373095048801688724209698079F /* sqrt(2) */
  #define NPY_SQRT1_2f  0.707106781186547524400844362104849039F /* 1/sqrt(2) */
  
-@@ -93,87 +109,152 @@ NPY_INLINE static float __npy_nzerof(void)
+@@ -93,87 +109,152 @@
  #define NPY_PI_4l     0.785398163397448309615660845819875721L /* pi/4 */
  #define NPY_1_PIl     0.318309886183790671537767526745028724L /* 1/pi */
  #define NPY_2_PIl     0.636619772367581343075535053490057448L /* 2/pi */
@@ -4655,7 +6182,7 @@ index 7ae166e54..a07f49501 100644
  #define NPY_SQRT2l    1.414213562373095048801688724209698079L /* sqrt(2) */
  #define NPY_SQRT1_2l  0.707106781186547524400844362104849039L /* 1/sqrt(2) */
  
-+/*
+ /*
 + * Integer functions.
 + */
 +NPY_INPLACE npy_uint npy_gcdu(npy_uint a, npy_uint b);
@@ -4703,7 +6230,7 @@ index 7ae166e54..a07f49501 100644
 +    npy_compute_cos
 +} NPY_TRIG_OP;
 +
- /*
++/*
   * C99 double math funcs
   */
 -double npy_sin(double x);
@@ -4745,8 +6272,6 @@ index 7ae166e54..a07f49501 100644
 -double npy_atan2(double x, double y);
 -double npy_pow(double x, double y);
 -double npy_modf(double x, double* y);
--
--double npy_copysign(double x, double y);
 +NPY_INPLACE double npy_sin(double x);
 +NPY_INPLACE double npy_cos(double x);
 +NPY_INPLACE double npy_tan(double x);
@@ -4785,7 +6310,8 @@ index 7ae166e54..a07f49501 100644
 +NPY_INPLACE double npy_modf(double x, double* y);
 +NPY_INPLACE double npy_frexp(double x, int* y);
 +NPY_INPLACE double npy_ldexp(double n, int y);
-+
+ 
+-double npy_copysign(double x, double y);
 +NPY_INPLACE double npy_copysign(double x, double y);
  double npy_nextafter(double x, double y);
  double npy_spacing(double x);
@@ -4857,45 +6383,10 @@ index 7ae166e54..a07f49501 100644
      #endif
  #endif
  
-@@ -192,102 +273,113 @@ double npy_spacing(double x);
+@@ -192,102 +273,113 @@
  /*
   * float C99 math functions
   */
--
--float npy_sinf(float x);
--float npy_cosf(float x);
--float npy_tanf(float x);
--float npy_sinhf(float x);
--float npy_coshf(float x);
--float npy_tanhf(float x);
--float npy_fabsf(float x);
--float npy_floorf(float x);
--float npy_ceilf(float x);
--float npy_rintf(float x);
--float npy_truncf(float x);
--float npy_sqrtf(float x);
--float npy_log10f(float x);
--float npy_logf(float x);
--float npy_expf(float x);
--float npy_expm1f(float x);
--float npy_asinf(float x);
--float npy_acosf(float x);
--float npy_atanf(float x);
--float npy_asinhf(float x);
--float npy_acoshf(float x);
--float npy_atanhf(float x);
--float npy_log1pf(float x);
--float npy_exp2f(float x);
--float npy_log2f(float x);
--
--float npy_atan2f(float x, float y);
--float npy_hypotf(float x, float y);
--float npy_powf(float x, float y);
--float npy_fmodf(float x, float y);
--
--float npy_modff(float x, float* y);
--
--float npy_copysignf(float x, float y);
 +NPY_INPLACE float npy_sinf(float x);
 +NPY_INPLACE float npy_cosf(float x);
 +NPY_INPLACE float npy_tanf(float x);
@@ -4931,7 +6422,41 @@ index 7ae166e54..a07f49501 100644
 +NPY_INPLACE float npy_modff(float x, float* y);
 +NPY_INPLACE float npy_frexpf(float x, int* y);
 +NPY_INPLACE float npy_ldexpf(float x, int y);
-+
+ 
+-float npy_sinf(float x);
+-float npy_cosf(float x);
+-float npy_tanf(float x);
+-float npy_sinhf(float x);
+-float npy_coshf(float x);
+-float npy_tanhf(float x);
+-float npy_fabsf(float x);
+-float npy_floorf(float x);
+-float npy_ceilf(float x);
+-float npy_rintf(float x);
+-float npy_truncf(float x);
+-float npy_sqrtf(float x);
+-float npy_log10f(float x);
+-float npy_logf(float x);
+-float npy_expf(float x);
+-float npy_expm1f(float x);
+-float npy_asinf(float x);
+-float npy_acosf(float x);
+-float npy_atanf(float x);
+-float npy_asinhf(float x);
+-float npy_acoshf(float x);
+-float npy_atanhf(float x);
+-float npy_log1pf(float x);
+-float npy_exp2f(float x);
+-float npy_log2f(float x);
+-
+-float npy_atan2f(float x, float y);
+-float npy_hypotf(float x, float y);
+-float npy_powf(float x, float y);
+-float npy_fmodf(float x, float y);
+-
+-float npy_modff(float x, float* y);
+-
+-float npy_copysignf(float x, float y);
 +NPY_INPLACE float npy_copysignf(float x, float y);
  float npy_nextafterf(float x, float y);
  float npy_spacingf(float x);
@@ -4940,41 +6465,6 @@ index 7ae166e54..a07f49501 100644
 - * float C99 math functions
 + * long double C99 math functions
   */
--
--npy_longdouble npy_sinl(npy_longdouble x);
--npy_longdouble npy_cosl(npy_longdouble x);
--npy_longdouble npy_tanl(npy_longdouble x);
--npy_longdouble npy_sinhl(npy_longdouble x);
--npy_longdouble npy_coshl(npy_longdouble x);
--npy_longdouble npy_tanhl(npy_longdouble x);
--npy_longdouble npy_fabsl(npy_longdouble x);
--npy_longdouble npy_floorl(npy_longdouble x);
--npy_longdouble npy_ceill(npy_longdouble x);
--npy_longdouble npy_rintl(npy_longdouble x);
--npy_longdouble npy_truncl(npy_longdouble x);
--npy_longdouble npy_sqrtl(npy_longdouble x);
--npy_longdouble npy_log10l(npy_longdouble x);
--npy_longdouble npy_logl(npy_longdouble x);
--npy_longdouble npy_expl(npy_longdouble x);
--npy_longdouble npy_expm1l(npy_longdouble x);
--npy_longdouble npy_asinl(npy_longdouble x);
--npy_longdouble npy_acosl(npy_longdouble x);
--npy_longdouble npy_atanl(npy_longdouble x);
--npy_longdouble npy_asinhl(npy_longdouble x);
--npy_longdouble npy_acoshl(npy_longdouble x);
--npy_longdouble npy_atanhl(npy_longdouble x);
--npy_longdouble npy_log1pl(npy_longdouble x);
--npy_longdouble npy_exp2l(npy_longdouble x);
--npy_longdouble npy_log2l(npy_longdouble x);
--
--npy_longdouble npy_atan2l(npy_longdouble x, npy_longdouble y);
--npy_longdouble npy_hypotl(npy_longdouble x, npy_longdouble y);
--npy_longdouble npy_powl(npy_longdouble x, npy_longdouble y);
--npy_longdouble npy_fmodl(npy_longdouble x, npy_longdouble y);
--
--npy_longdouble npy_modfl(npy_longdouble x, npy_longdouble* y);
--
--npy_longdouble npy_copysignl(npy_longdouble x, npy_longdouble y);
 +NPY_INPLACE npy_longdouble npy_sinl(npy_longdouble x);
 +NPY_INPLACE npy_longdouble npy_cosl(npy_longdouble x);
 +NPY_INPLACE npy_longdouble npy_tanl(npy_longdouble x);
@@ -5010,7 +6500,41 @@ index 7ae166e54..a07f49501 100644
 +NPY_INPLACE npy_longdouble npy_modfl(npy_longdouble x, npy_longdouble* y);
 +NPY_INPLACE npy_longdouble npy_frexpl(npy_longdouble x, int* y);
 +NPY_INPLACE npy_longdouble npy_ldexpl(npy_longdouble x, int y);
-+
+ 
+-npy_longdouble npy_sinl(npy_longdouble x);
+-npy_longdouble npy_cosl(npy_longdouble x);
+-npy_longdouble npy_tanl(npy_longdouble x);
+-npy_longdouble npy_sinhl(npy_longdouble x);
+-npy_longdouble npy_coshl(npy_longdouble x);
+-npy_longdouble npy_tanhl(npy_longdouble x);
+-npy_longdouble npy_fabsl(npy_longdouble x);
+-npy_longdouble npy_floorl(npy_longdouble x);
+-npy_longdouble npy_ceill(npy_longdouble x);
+-npy_longdouble npy_rintl(npy_longdouble x);
+-npy_longdouble npy_truncl(npy_longdouble x);
+-npy_longdouble npy_sqrtl(npy_longdouble x);
+-npy_longdouble npy_log10l(npy_longdouble x);
+-npy_longdouble npy_logl(npy_longdouble x);
+-npy_longdouble npy_expl(npy_longdouble x);
+-npy_longdouble npy_expm1l(npy_longdouble x);
+-npy_longdouble npy_asinl(npy_longdouble x);
+-npy_longdouble npy_acosl(npy_longdouble x);
+-npy_longdouble npy_atanl(npy_longdouble x);
+-npy_longdouble npy_asinhl(npy_longdouble x);
+-npy_longdouble npy_acoshl(npy_longdouble x);
+-npy_longdouble npy_atanhl(npy_longdouble x);
+-npy_longdouble npy_log1pl(npy_longdouble x);
+-npy_longdouble npy_exp2l(npy_longdouble x);
+-npy_longdouble npy_log2l(npy_longdouble x);
+-
+-npy_longdouble npy_atan2l(npy_longdouble x, npy_longdouble y);
+-npy_longdouble npy_hypotl(npy_longdouble x, npy_longdouble y);
+-npy_longdouble npy_powl(npy_longdouble x, npy_longdouble y);
+-npy_longdouble npy_fmodl(npy_longdouble x, npy_longdouble y);
+-
+-npy_longdouble npy_modfl(npy_longdouble x, npy_longdouble* y);
+-
+-npy_longdouble npy_copysignl(npy_longdouble x, npy_longdouble y);
 +NPY_INPLACE npy_longdouble npy_copysignl(npy_longdouble x, npy_longdouble y);
  npy_longdouble npy_nextafterl(npy_longdouble x, npy_longdouble y);
  npy_longdouble npy_spacingl(npy_longdouble x);
@@ -5056,7 +6580,7 @@ index 7ae166e54..a07f49501 100644
  
  #define npy_degrees npy_rad2deg
  #define npy_degreesf npy_rad2degf
-@@ -394,6 +486,19 @@ npy_cdouble npy_csqrt(npy_cdouble z);
+@@ -394,6 +486,19 @@
  
  npy_cdouble npy_ccos(npy_cdouble z);
  npy_cdouble npy_csin(npy_cdouble z);
@@ -5076,7 +6600,7 @@ index 7ae166e54..a07f49501 100644
  
  /*
   * Single precision complex functions
-@@ -409,6 +514,20 @@ npy_cfloat npy_csqrtf(npy_cfloat z);
+@@ -409,6 +514,20 @@
  
  npy_cfloat npy_ccosf(npy_cfloat z);
  npy_cfloat npy_csinf(npy_cfloat z);
@@ -5097,7 +6621,7 @@ index 7ae166e54..a07f49501 100644
  
  /*
   * Extended precision complex functions
-@@ -424,15 +543,57 @@ npy_clongdouble npy_csqrtl(npy_clongdouble z);
+@@ -424,15 +543,57 @@
  
  npy_clongdouble npy_ccosl(npy_clongdouble z);
  npy_clongdouble npy_csinl(npy_clongdouble z);
@@ -5155,10 +6679,38 @@ index 7ae166e54..a07f49501 100644
 +#endif
 +
  #endif
-diff --git a/include/numpy/numpyconfig.h b/include/numpy/numpyconfig.h
-index 401d19fd7..4df4ea438 100644
---- a/include/numpy/numpyconfig.h
-+++ b/include/numpy/numpyconfig.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/_numpyconfig.h spacy-2.3.2/include/numpy/_numpyconfig.h
+--- spacy-2.3.2-orig/include/numpy/_numpyconfig.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/_numpyconfig.h	2020-11-11 13:37:37.422412633 +0100
+@@ -1,3 +1,4 @@
++#define NPY_HAVE_ENDIAN_H 1
+ #define NPY_SIZEOF_SHORT SIZEOF_SHORT
+ #define NPY_SIZEOF_INT SIZEOF_INT
+ #define NPY_SIZEOF_LONG SIZEOF_LONG
+@@ -8,6 +9,7 @@
+ #define NPY_SIZEOF_LONGDOUBLE 16
+ #define NPY_SIZEOF_COMPLEX_LONGDOUBLE 32
+ #define NPY_SIZEOF_PY_INTPTR_T 8
++#define NPY_SIZEOF_OFF_T 8
+ #define NPY_SIZEOF_PY_LONG_LONG 8
+ #define NPY_SIZEOF_LONGLONG 8
+ #define NPY_NO_SMP 0
+@@ -19,10 +21,11 @@
+ #define NPY_HAVE_COMPLEX_DOUBLE 1
+ #define NPY_HAVE_COMPLEX_FLOAT 1
+ #define NPY_HAVE_COMPLEX_LONG_DOUBLE 1
++#define NPY_RELAXED_STRIDES_CHECKING 1
+ #define NPY_USE_C99_FORMATS 1
+ #define NPY_VISIBILITY_HIDDEN __attribute__((visibility("hidden")))
+ #define NPY_ABI_VERSION 0x01000009
+-#define NPY_API_VERSION 0x00000007
++#define NPY_API_VERSION 0x0000000D
+ 
+ #ifndef __STDC_FORMAT_MACROS
+ #define __STDC_FORMAT_MACROS 1
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/numpyconfig.h spacy-2.3.2/include/numpy/numpyconfig.h
+--- spacy-2.3.2-orig/include/numpy/numpyconfig.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/numpyconfig.h	2020-11-11 13:37:37.422412633 +0100
 @@ -6,19 +6,19 @@
  /*
   * On Mac OS X, because there is only one configuration stage for all the archs
@@ -5207,10 +6759,9 @@ index 401d19fd7..4df4ea438 100644
 +#define NPY_1_19_API_VERSION 0x00000008
  
  #endif
-diff --git a/include/numpy/oldnumeric.h b/include/numpy/oldnumeric.h
-index 748f06da3..38530faf0 100644
---- a/include/numpy/oldnumeric.h
-+++ b/include/numpy/oldnumeric.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/oldnumeric.h spacy-2.3.2/include/numpy/oldnumeric.h
+--- spacy-2.3.2-orig/include/numpy/oldnumeric.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/oldnumeric.h	2020-11-11 13:37:37.426412820 +0100
 @@ -1,9 +1,11 @@
  #include "arrayobject.h"
  
@@ -5223,11 +6774,9 @@ index 748f06da3..38530faf0 100644
  
  #define PyArray_UNSIGNED_TYPES
  #define PyArray_SBYTE NPY_BYTE
-diff --git a/include/numpy/random/bitgen.h b/include/numpy/random/bitgen.h
-new file mode 100644
-index 000000000..83c2858dd
---- /dev/null
-+++ b/include/numpy/random/bitgen.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/random/bitgen.h spacy-2.3.2/include/numpy/random/bitgen.h
+--- spacy-2.3.2-orig/include/numpy/random/bitgen.h	1970-01-01 01:00:00.000000000 +0100
++++ spacy-2.3.2/include/numpy/random/bitgen.h	2020-11-11 13:37:37.426412820 +0100
 @@ -0,0 +1,20 @@
 +#ifndef _RANDOM_BITGEN_H
 +#define _RANDOM_BITGEN_H
@@ -5249,11 +6798,9 @@ index 000000000..83c2858dd
 +
 +
 +#endif
-diff --git a/include/numpy/random/distributions.h b/include/numpy/random/distributions.h
-new file mode 100644
-index 000000000..c474c4d14
---- /dev/null
-+++ b/include/numpy/random/distributions.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/random/distributions.h spacy-2.3.2/include/numpy/random/distributions.h
+--- spacy-2.3.2-orig/include/numpy/random/distributions.h	1970-01-01 01:00:00.000000000 +0100
++++ spacy-2.3.2/include/numpy/random/distributions.h	2020-11-11 13:37:37.426412820 +0100
 @@ -0,0 +1,200 @@
 +#ifndef _RANDOMDGEN__DISTRIBUTIONS_H_
 +#define _RANDOMDGEN__DISTRIBUTIONS_H_
@@ -5455,317 +7002,706 @@ index 000000000..c474c4d14
 +}
 +
 +#endif
-diff --git a/include/numpy/ufunc_api.txt b/include/numpy/ufunc_api.txt
-index 3365433cd..386848c30 100644
---- a/include/numpy/ufunc_api.txt
-+++ b/include/numpy/ufunc_api.txt
-@@ -1,14 +1,14 @@
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/__ufunc_api.h spacy-2.3.2/include/numpy/__ufunc_api.h
+--- spacy-2.3.2-orig/include/numpy/__ufunc_api.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/__ufunc_api.h	2020-11-11 13:37:37.426412820 +0100
+@@ -1,98 +1,94 @@
  
- =================
--Numpy Ufunc C-API
+ #ifdef _UMATHMODULE
+ 
+-#ifdef NPY_ENABLE_SEPARATE_COMPILATION
+ extern NPY_NO_EXPORT PyTypeObject PyUFunc_Type;
+-#else
+-NPY_NO_EXPORT PyTypeObject PyUFunc_Type;
+-#endif
+ 
+-#ifdef NPY_ENABLE_SEPARATE_COMPILATION
+-    extern NPY_NO_EXPORT PyTypeObject PyUFunc_Type;
+-#else
+-    NPY_NO_EXPORT PyTypeObject PyUFunc_Type;
+-#endif
++extern NPY_NO_EXPORT PyTypeObject PyUFunc_Type;
+ 
+-NPY_NO_EXPORT PyObject * PyUFunc_FromFuncAndData \
+-       (PyUFuncGenericFunction *, void **, char *, int, int, int, int, char *, char *, int);
+-NPY_NO_EXPORT int PyUFunc_RegisterLoopForType \
+-       (PyUFuncObject *, int, PyUFuncGenericFunction, int *, void *);
+-NPY_NO_EXPORT int PyUFunc_GenericFunction \
++NPY_NO_EXPORT  PyObject * PyUFunc_FromFuncAndData \
++       (PyUFuncGenericFunction *, void **, char *, int, int, int, int, const char *, const char *, int);
++NPY_NO_EXPORT  int PyUFunc_RegisterLoopForType \
++       (PyUFuncObject *, int, PyUFuncGenericFunction, const int *, void *);
++NPY_NO_EXPORT  int PyUFunc_GenericFunction \
+        (PyUFuncObject *, PyObject *, PyObject *, PyArrayObject **);
+-NPY_NO_EXPORT void PyUFunc_f_f_As_d_d \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_d_d \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_f_f \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_g_g \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_F_F_As_D_D \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_F_F \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_D_D \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_G_G \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_O_O \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_ff_f_As_dd_d \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_ff_f \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_dd_d \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_gg_g \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_FF_F_As_DD_D \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_DD_D \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_FF_F \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_GG_G \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_OO_O \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_O_O_method \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_OO_O_method \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_On_Om \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT int PyUFunc_GetPyValues \
++NPY_NO_EXPORT  void PyUFunc_f_f_As_d_d \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_d_d \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_f_f \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_g_g \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_F_F_As_D_D \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_F_F \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_D_D \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_G_G \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_O_O \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_ff_f_As_dd_d \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_ff_f \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_dd_d \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_gg_g \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_FF_F_As_DD_D \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_DD_D \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_FF_F \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_GG_G \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_OO_O \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_O_O_method \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_OO_O_method \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_On_Om \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  int PyUFunc_GetPyValues \
+        (char *, int *, int *, PyObject **);
+-NPY_NO_EXPORT int PyUFunc_checkfperr \
++NPY_NO_EXPORT  int PyUFunc_checkfperr \
+        (int, PyObject *, int *);
+-NPY_NO_EXPORT void PyUFunc_clearfperr \
++NPY_NO_EXPORT  void PyUFunc_clearfperr \
+        (void);
+-NPY_NO_EXPORT int PyUFunc_getfperr \
++NPY_NO_EXPORT  int PyUFunc_getfperr \
+        (void);
+-NPY_NO_EXPORT int PyUFunc_handlefperr \
++NPY_NO_EXPORT  int PyUFunc_handlefperr \
+        (int, PyObject *, int, int *);
+-NPY_NO_EXPORT int PyUFunc_ReplaceLoopBySignature \
+-       (PyUFuncObject *, PyUFuncGenericFunction, int *, PyUFuncGenericFunction *);
+-NPY_NO_EXPORT PyObject * PyUFunc_FromFuncAndDataAndSignature \
+-       (PyUFuncGenericFunction *, void **, char *, int, int, int, int, char *, char *, int, const char *);
+-NPY_NO_EXPORT int PyUFunc_SetUsesArraysAsData \
++NPY_NO_EXPORT  int PyUFunc_ReplaceLoopBySignature \
++       (PyUFuncObject *, PyUFuncGenericFunction, const int *, PyUFuncGenericFunction *);
++NPY_NO_EXPORT  PyObject * PyUFunc_FromFuncAndDataAndSignature \
++       (PyUFuncGenericFunction *, void **, char *, int, int, int, int, const char *, const char *, int, const char *);
++NPY_NO_EXPORT  int PyUFunc_SetUsesArraysAsData \
+        (void **, size_t);
+-NPY_NO_EXPORT void PyUFunc_e_e \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_e_e_As_f_f \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_e_e_As_d_d \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_ee_e \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_ee_e_As_ff_f \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT void PyUFunc_ee_e_As_dd_d \
+-       (char **, npy_intp *, npy_intp *, void *);
+-NPY_NO_EXPORT int PyUFunc_DefaultTypeResolver \
++NPY_NO_EXPORT  void PyUFunc_e_e \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_e_e_As_f_f \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_e_e_As_d_d \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_ee_e \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_ee_e_As_ff_f \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  void PyUFunc_ee_e_As_dd_d \
++       (char **, npy_intp const *, npy_intp const *, void *);
++NPY_NO_EXPORT  int PyUFunc_DefaultTypeResolver \
+        (PyUFuncObject *, NPY_CASTING, PyArrayObject **, PyObject *, PyArray_Descr **);
+-NPY_NO_EXPORT int PyUFunc_ValidateCasting \
++NPY_NO_EXPORT  int PyUFunc_ValidateCasting \
+        (PyUFuncObject *, NPY_CASTING, PyArrayObject **, PyArray_Descr **);
++NPY_NO_EXPORT  int PyUFunc_RegisterLoopForDescr \
++       (PyUFuncObject *, PyArray_Descr *, PyUFuncGenericFunction, PyArray_Descr **, void *);
++NPY_NO_EXPORT  PyObject * PyUFunc_FromFuncAndDataAndSignatureAndIdentity \
++       (PyUFuncGenericFunction *, void **, char *, int, int, int, int, const char *, const char *, const int, const char *, PyObject *);
+ 
+ #else
+ 
+@@ -112,76 +108,76 @@
+ 
+ #define PyUFunc_Type (*(PyTypeObject *)PyUFunc_API[0])
+ #define PyUFunc_FromFuncAndData \
+-        (*(PyObject * (*)(PyUFuncGenericFunction *, void **, char *, int, int, int, int, char *, char *, int)) \
++        (*(PyObject * (*)(PyUFuncGenericFunction *, void **, char *, int, int, int, int, const char *, const char *, int)) \
+          PyUFunc_API[1])
+ #define PyUFunc_RegisterLoopForType \
+-        (*(int (*)(PyUFuncObject *, int, PyUFuncGenericFunction, int *, void *)) \
++        (*(int (*)(PyUFuncObject *, int, PyUFuncGenericFunction, const int *, void *)) \
+          PyUFunc_API[2])
+ #define PyUFunc_GenericFunction \
+         (*(int (*)(PyUFuncObject *, PyObject *, PyObject *, PyArrayObject **)) \
+          PyUFunc_API[3])
+ #define PyUFunc_f_f_As_d_d \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[4])
+ #define PyUFunc_d_d \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[5])
+ #define PyUFunc_f_f \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[6])
+ #define PyUFunc_g_g \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[7])
+ #define PyUFunc_F_F_As_D_D \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[8])
+ #define PyUFunc_F_F \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[9])
+ #define PyUFunc_D_D \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[10])
+ #define PyUFunc_G_G \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[11])
+ #define PyUFunc_O_O \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[12])
+ #define PyUFunc_ff_f_As_dd_d \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[13])
+ #define PyUFunc_ff_f \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[14])
+ #define PyUFunc_dd_d \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[15])
+ #define PyUFunc_gg_g \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[16])
+ #define PyUFunc_FF_F_As_DD_D \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[17])
+ #define PyUFunc_DD_D \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[18])
+ #define PyUFunc_FF_F \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[19])
+ #define PyUFunc_GG_G \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[20])
+ #define PyUFunc_OO_O \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[21])
+ #define PyUFunc_O_O_method \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[22])
+ #define PyUFunc_OO_O_method \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[23])
+ #define PyUFunc_On_Om \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[24])
+ #define PyUFunc_GetPyValues \
+         (*(int (*)(char *, int *, int *, PyObject **)) \
+@@ -199,31 +195,31 @@
+         (*(int (*)(int, PyObject *, int, int *)) \
+          PyUFunc_API[29])
+ #define PyUFunc_ReplaceLoopBySignature \
+-        (*(int (*)(PyUFuncObject *, PyUFuncGenericFunction, int *, PyUFuncGenericFunction *)) \
++        (*(int (*)(PyUFuncObject *, PyUFuncGenericFunction, const int *, PyUFuncGenericFunction *)) \
+          PyUFunc_API[30])
+ #define PyUFunc_FromFuncAndDataAndSignature \
+-        (*(PyObject * (*)(PyUFuncGenericFunction *, void **, char *, int, int, int, int, char *, char *, int, const char *)) \
++        (*(PyObject * (*)(PyUFuncGenericFunction *, void **, char *, int, int, int, int, const char *, const char *, int, const char *)) \
+          PyUFunc_API[31])
+ #define PyUFunc_SetUsesArraysAsData \
+         (*(int (*)(void **, size_t)) \
+          PyUFunc_API[32])
+ #define PyUFunc_e_e \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[33])
+ #define PyUFunc_e_e_As_f_f \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[34])
+ #define PyUFunc_e_e_As_d_d \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[35])
+ #define PyUFunc_ee_e \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[36])
+ #define PyUFunc_ee_e_As_ff_f \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[37])
+ #define PyUFunc_ee_e_As_dd_d \
+-        (*(void (*)(char **, npy_intp *, npy_intp *, void *)) \
++        (*(void (*)(char **, npy_intp const *, npy_intp const *, void *)) \
+          PyUFunc_API[38])
+ #define PyUFunc_DefaultTypeResolver \
+         (*(int (*)(PyUFuncObject *, NPY_CASTING, PyArrayObject **, PyObject *, PyArray_Descr **)) \
+@@ -231,15 +227,22 @@
+ #define PyUFunc_ValidateCasting \
+         (*(int (*)(PyUFuncObject *, NPY_CASTING, PyArrayObject **, PyArray_Descr **)) \
+          PyUFunc_API[40])
++#define PyUFunc_RegisterLoopForDescr \
++        (*(int (*)(PyUFuncObject *, PyArray_Descr *, PyUFuncGenericFunction, PyArray_Descr **, void *)) \
++         PyUFunc_API[41])
++#define PyUFunc_FromFuncAndDataAndSignatureAndIdentity \
++        (*(PyObject * (*)(PyUFuncGenericFunction *, void **, char *, int, int, int, int, const char *, const char *, const int, const char *, PyObject *)) \
++         PyUFunc_API[42])
+ 
+-static int
++static NPY_INLINE int
+ _import_umath(void)
+ {
+-  PyObject *numpy = PyImport_ImportModule("numpy.core.umath");
++  PyObject *numpy = PyImport_ImportModule("numpy.core._multiarray_umath");
+   PyObject *c_api = NULL;
+ 
+   if (numpy == NULL) {
+-      PyErr_SetString(PyExc_ImportError, "numpy.core.umath failed to import");
++      PyErr_SetString(PyExc_ImportError,
++                      "numpy.core._multiarray_umath failed to import");
+       return -1;
+   }
+   c_api = PyObject_GetAttrString(numpy, "_UFUNC_API");
+@@ -249,21 +252,12 @@
+       return -1;
+   }
+ 
+-#if PY_VERSION_HEX >= 0x03000000
+   if (!PyCapsule_CheckExact(c_api)) {
+       PyErr_SetString(PyExc_RuntimeError, "_UFUNC_API is not PyCapsule object");
+       Py_DECREF(c_api);
+       return -1;
+   }
+   PyUFunc_API = (void **)PyCapsule_GetPointer(c_api, NULL);
+-#else
+-  if (!PyCObject_Check(c_api)) {
+-      PyErr_SetString(PyExc_RuntimeError, "_UFUNC_API is not PyCObject object");
+-      Py_DECREF(c_api);
+-      return -1;
+-  }
+-  PyUFunc_API = (void **)PyCObject_AsVoidPtr(c_api);
+-#endif
+   Py_DECREF(c_api);
+   if (PyUFunc_API == NULL) {
+       PyErr_SetString(PyExc_RuntimeError, "_UFUNC_API is NULL pointer");
+@@ -272,12 +266,6 @@
+   return 0;
+ }
+ 
+-#if PY_VERSION_HEX >= 0x03000000
+-#define NUMPY_IMPORT_UMATH_RETVAL NULL
+-#else
+-#define NUMPY_IMPORT_UMATH_RETVAL
+-#endif
+-
+ #define import_umath() \
+     do {\
+         UFUNC_NOFPE\
+@@ -285,7 +273,7 @@
+             PyErr_Print();\
+             PyErr_SetString(PyExc_ImportError,\
+                     "numpy.core.umath failed to import");\
+-            return NUMPY_IMPORT_UMATH_RETVAL;\
++            return NULL;\
+         }\
+     } while(0)
+ 
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/ufunc_api.txt spacy-2.3.2/include/numpy/ufunc_api.txt
+--- spacy-2.3.2-orig/include/numpy/ufunc_api.txt	1970-01-01 01:00:00.000000000 +0100
++++ spacy-2.3.2/include/numpy/ufunc_api.txt	2020-11-11 13:37:37.422412633 +0100
+@@ -0,0 +1,333 @@
++
++=================
 +NumPy Ufunc C-API
- =================
- ::
- 
-   PyObject *
-   PyUFunc_FromFuncAndData(PyUFuncGenericFunction *func, void
-                           **data, char *types, int ntypes, int nin, int
--                          nout, int identity, char *name, char *doc, int
--                          check_return)
++=================
++::
++
++  PyObject *
++  PyUFunc_FromFuncAndData(PyUFuncGenericFunction *func, void
++                          **data, char *types, int ntypes, int nin, int
 +                          nout, int identity, const char *name, const
 +                          char *doc, int unused)
- 
- 
- ::
-@@ -16,7 +16,8 @@ Numpy Ufunc C-API
-   int
-   PyUFunc_RegisterLoopForType(PyUFuncObject *ufunc, int
-                               usertype, PyUFuncGenericFunction
--                              function, int *arg_types, void *data)
++
++
++::
++
++  int
++  PyUFunc_RegisterLoopForType(PyUFuncObject *ufunc, int
++                              usertype, PyUFuncGenericFunction
 +                              function, const int *arg_types, void
 +                              *data)
- 
- 
- ::
-@@ -26,156 +27,151 @@ Numpy Ufunc C-API
-                           *kwds, PyArrayObject **op)
- 
- 
--This generic function is called with the ufunc object, the arguments to it,
--and an array of (pointers to) PyArrayObjects which are NULL.
--
--'op' is an array of at least NPY_MAXARGS PyArrayObject *.
--
- ::
- 
-   void
--  PyUFunc_f_f_As_d_d(char **args, npy_intp *dimensions, npy_intp
--                     *steps, void *func)
++
++
++::
++
++  int
++  PyUFunc_GenericFunction(PyUFuncObject *ufunc, PyObject *args, PyObject
++                          *kwds, PyArrayObject **op)
++
++
++::
++
++  void
 +  PyUFunc_f_f_As_d_d(char **args, npy_intp const *dimensions, npy_intp
 +                     const *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_d_d(char **args, npy_intp *dimensions, npy_intp *steps, void
--              *func)
++
++
++::
++
++  void
 +  PyUFunc_d_d(char **args, npy_intp const *dimensions, npy_intp const
 +              *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_f_f(char **args, npy_intp *dimensions, npy_intp *steps, void
--              *func)
++
++
++::
++
++  void
 +  PyUFunc_f_f(char **args, npy_intp const *dimensions, npy_intp const
 +              *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_g_g(char **args, npy_intp *dimensions, npy_intp *steps, void
--              *func)
++
++
++::
++
++  void
 +  PyUFunc_g_g(char **args, npy_intp const *dimensions, npy_intp const
 +              *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_F_F_As_D_D(char **args, npy_intp *dimensions, npy_intp
--                     *steps, void *func)
++
++
++::
++
++  void
 +  PyUFunc_F_F_As_D_D(char **args, npy_intp const *dimensions, npy_intp
 +                     const *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_F_F(char **args, npy_intp *dimensions, npy_intp *steps, void
--              *func)
++
++
++::
++
++  void
 +  PyUFunc_F_F(char **args, npy_intp const *dimensions, npy_intp const
 +              *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_D_D(char **args, npy_intp *dimensions, npy_intp *steps, void
--              *func)
++
++
++::
++
++  void
 +  PyUFunc_D_D(char **args, npy_intp const *dimensions, npy_intp const
 +              *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_G_G(char **args, npy_intp *dimensions, npy_intp *steps, void
--              *func)
++
++
++::
++
++  void
 +  PyUFunc_G_G(char **args, npy_intp const *dimensions, npy_intp const
 +              *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_O_O(char **args, npy_intp *dimensions, npy_intp *steps, void
--              *func)
++
++
++::
++
++  void
 +  PyUFunc_O_O(char **args, npy_intp const *dimensions, npy_intp const
 +              *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_ff_f_As_dd_d(char **args, npy_intp *dimensions, npy_intp
--                       *steps, void *func)
++
++
++::
++
++  void
 +  PyUFunc_ff_f_As_dd_d(char **args, npy_intp const *dimensions, npy_intp
 +                       const *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_ff_f(char **args, npy_intp *dimensions, npy_intp *steps, void
--               *func)
++
++
++::
++
++  void
 +  PyUFunc_ff_f(char **args, npy_intp const *dimensions, npy_intp const
 +               *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_dd_d(char **args, npy_intp *dimensions, npy_intp *steps, void
--               *func)
++
++
++::
++
++  void
 +  PyUFunc_dd_d(char **args, npy_intp const *dimensions, npy_intp const
 +               *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_gg_g(char **args, npy_intp *dimensions, npy_intp *steps, void
--               *func)
++
++
++::
++
++  void
 +  PyUFunc_gg_g(char **args, npy_intp const *dimensions, npy_intp const
 +               *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_FF_F_As_DD_D(char **args, npy_intp *dimensions, npy_intp
--                       *steps, void *func)
++
++
++::
++
++  void
 +  PyUFunc_FF_F_As_DD_D(char **args, npy_intp const *dimensions, npy_intp
 +                       const *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_DD_D(char **args, npy_intp *dimensions, npy_intp *steps, void
--               *func)
++
++
++::
++
++  void
 +  PyUFunc_DD_D(char **args, npy_intp const *dimensions, npy_intp const
 +               *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_FF_F(char **args, npy_intp *dimensions, npy_intp *steps, void
--               *func)
++
++
++::
++
++  void
 +  PyUFunc_FF_F(char **args, npy_intp const *dimensions, npy_intp const
 +               *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_GG_G(char **args, npy_intp *dimensions, npy_intp *steps, void
--               *func)
++
++
++::
++
++  void
 +  PyUFunc_GG_G(char **args, npy_intp const *dimensions, npy_intp const
 +               *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_OO_O(char **args, npy_intp *dimensions, npy_intp *steps, void
--               *func)
++
++
++::
++
++  void
 +  PyUFunc_OO_O(char **args, npy_intp const *dimensions, npy_intp const
 +               *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_O_O_method(char **args, npy_intp *dimensions, npy_intp
--                     *steps, void *func)
++
++
++::
++
++  void
 +  PyUFunc_O_O_method(char **args, npy_intp const *dimensions, npy_intp
 +                     const *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_OO_O_method(char **args, npy_intp *dimensions, npy_intp
--                      *steps, void *func)
++
++
++::
++
++  void
 +  PyUFunc_OO_O_method(char **args, npy_intp const *dimensions, npy_intp
 +                      const *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_On_Om(char **args, npy_intp *dimensions, npy_intp *steps, void
--                *func)
++
++
++::
++
++  void
 +  PyUFunc_On_Om(char **args, npy_intp const *dimensions, npy_intp const
 +                *steps, void *func)
- 
- 
- ::
-@@ -218,7 +214,7 @@ owns a new reference to errobj.
-   int
-   PyUFunc_ReplaceLoopBySignature(PyUFuncObject
-                                  *func, PyUFuncGenericFunction
--                                 newfunc, int
++
++
++::
++
++  int
++  PyUFunc_GetPyValues(char *name, int *bufsize, int *errmask, PyObject
++                      **errobj)
++
++
++On return, if errobj is populated with a non-NULL value, the caller
++owns a new reference to errobj.
++
++::
++
++  int
++  PyUFunc_checkfperr(int errmask, PyObject *errobj, int *first)
++
++
++::
++
++  void
++  PyUFunc_clearfperr()
++
++
++::
++
++  int
++  PyUFunc_getfperr(void )
++
++
++::
++
++  int
++  PyUFunc_handlefperr(int errmask, PyObject *errobj, int retstatus, int
++                      *first)
++
++
++::
++
++  int
++  PyUFunc_ReplaceLoopBySignature(PyUFuncObject
++                                 *func, PyUFuncGenericFunction
 +                                 newfunc, const int
-                                  *signature, PyUFuncGenericFunction
-                                  *oldfunc)
- 
-@@ -229,8 +225,8 @@ owns a new reference to errobj.
-   PyUFunc_FromFuncAndDataAndSignature(PyUFuncGenericFunction *func, void
-                                       **data, char *types, int
-                                       ntypes, int nin, int nout, int
--                                      identity, char *name, char
--                                      *doc, int check_return, const char
++                                 *signature, PyUFuncGenericFunction
++                                 *oldfunc)
++
++
++::
++
++  PyObject *
++  PyUFunc_FromFuncAndDataAndSignature(PyUFuncGenericFunction *func, void
++                                      **data, char *types, int
++                                      ntypes, int nin, int nout, int
 +                                      identity, const char *name, const
 +                                      char *doc, int unused, const char
-                                       *signature)
- 
- 
-@@ -243,43 +239,43 @@ owns a new reference to errobj.
- ::
- 
-   void
--  PyUFunc_e_e(char **args, npy_intp *dimensions, npy_intp *steps, void
--              *func)
++                                      *signature)
++
++
++::
++
++  int
++  PyUFunc_SetUsesArraysAsData(void **data, size_t i)
++
++
++::
++
++  void
 +  PyUFunc_e_e(char **args, npy_intp const *dimensions, npy_intp const
 +              *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_e_e_As_f_f(char **args, npy_intp *dimensions, npy_intp
--                     *steps, void *func)
++
++
++::
++
++  void
 +  PyUFunc_e_e_As_f_f(char **args, npy_intp const *dimensions, npy_intp
 +                     const *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_e_e_As_d_d(char **args, npy_intp *dimensions, npy_intp
--                     *steps, void *func)
++
++
++::
++
++  void
 +  PyUFunc_e_e_As_d_d(char **args, npy_intp const *dimensions, npy_intp
 +                     const *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_ee_e(char **args, npy_intp *dimensions, npy_intp *steps, void
--               *func)
++
++
++::
++
++  void
 +  PyUFunc_ee_e(char **args, npy_intp const *dimensions, npy_intp const
 +               *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_ee_e_As_ff_f(char **args, npy_intp *dimensions, npy_intp
--                       *steps, void *func)
++
++
++::
++
++  void
 +  PyUFunc_ee_e_As_ff_f(char **args, npy_intp const *dimensions, npy_intp
 +                       const *steps, void *func)
- 
- 
- ::
- 
-   void
--  PyUFunc_ee_e_As_dd_d(char **args, npy_intp *dimensions, npy_intp
--                       *steps, void *func)
++
++
++::
++
++  void
 +  PyUFunc_ee_e_As_dd_d(char **args, npy_intp const *dimensions, npy_intp
 +                       const *steps, void *func)
- 
- 
- ::
-@@ -310,3 +306,28 @@ the output operands where provided.
- 
- Returns 0 on success, -1 (with exception raised) on validation failure.
- 
++
++
++::
++
++  int
++  PyUFunc_DefaultTypeResolver(PyUFuncObject *ufunc, NPY_CASTING
++                              casting, PyArrayObject
++                              **operands, PyObject
++                              *type_tup, PyArray_Descr **out_dtypes)
++
++
++This function applies the default type resolution rules
++for the provided ufunc.
++
++Returns 0 on success, -1 on error.
++
++::
++
++  int
++  PyUFunc_ValidateCasting(PyUFuncObject *ufunc, NPY_CASTING
++                          casting, PyArrayObject
++                          **operands, PyArray_Descr **dtypes)
++
++
++Validates that the input operands can be cast to
++the input types, and the output types can be cast to
++the output operands where provided.
++
++Returns 0 on success, -1 (with exception raised) on validation failure.
++
 +::
 +
 +  int
@@ -5791,10 +7727,9 @@ index 3365433cd..386848c30 100644
 +                                                 *identity_value)
 +
 +
-diff --git a/include/numpy/ufuncobject.h b/include/numpy/ufuncobject.h
-index 95afd5aa2..e5d845842 100644
---- a/include/numpy/ufuncobject.h
-+++ b/include/numpy/ufuncobject.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/ufuncobject.h spacy-2.3.2/include/numpy/ufuncobject.h
+--- spacy-2.3.2-orig/include/numpy/ufuncobject.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/ufuncobject.h	2020-11-11 13:37:37.422412633 +0100
 @@ -2,6 +2,7 @@
  #define Py_UFUNCOBJECT_H
  
@@ -5803,7 +7738,7 @@ index 95afd5aa2..e5d845842 100644
  
  #ifdef __cplusplus
  extern "C" {
-@@ -13,21 +14,10 @@ extern "C" {
+@@ -13,23 +14,12 @@
   */
  typedef void (*PyUFuncGenericFunction)
              (char **args,
@@ -5813,8 +7748,8 @@ index 95afd5aa2..e5d845842 100644
 +             npy_intp const *strides,
               void *innerloopdata);
  
--/*
-- * The most generic one-dimensional inner loop for
+ /*
+  * The most generic one-dimensional inner loop for
 - * a standard element-wise ufunc. This typedef is also
 - * more consistent with the other NumPy function pointer typedefs
 - * than PyUFuncGenericFunction.
@@ -5824,10 +7759,12 @@ index 95afd5aa2..e5d845842 100644
 -                npy_intp count,
 -                NpyAuxData *innerloopdata);
 -
- /*
-  * The most generic one-dimensional inner loop for
+-/*
+- * The most generic one-dimensional inner loop for
   * a masked standard element-wise ufunc. "Masked" here means that it skips
-@@ -88,7 +78,7 @@ typedef int (PyUFunc_TypeResolutionFunc)(
+  * doing calculations on any items for which the maskptr array has a true
+  * value.
+@@ -88,7 +78,7 @@
   *
   * ufunc:             The ufunc object.
   * dtypes:            An array which has been populated with dtypes,
@@ -5836,7 +7773,7 @@ index 95afd5aa2..e5d845842 100644
   *                    for the same ufunc.
   * fixed_strides:     For each input/output, either the stride that
   *                    will be used every time the function is called
-@@ -111,13 +101,6 @@ typedef int (PyUFunc_LegacyInnerLoopSelectionFunc)(
+@@ -111,13 +101,6 @@
                              PyUFuncGenericFunction *out_innerloop,
                              void **out_innerloopdata,
                              int *out_needs_api);
@@ -5850,7 +7787,7 @@ index 95afd5aa2..e5d845842 100644
  typedef int (PyUFunc_MaskedInnerLoopSelectionFunc)(
                              struct _tagPyUFuncObject *ufunc,
                              PyArray_Descr **dtypes,
-@@ -137,7 +120,11 @@ typedef struct _tagPyUFuncObject {
+@@ -137,7 +120,11 @@
           */
          int nin, nout, nargs;
  
@@ -5863,7 +7800,7 @@ index 95afd5aa2..e5d845842 100644
          int identity;
  
          /* Array of one-dimensional core loops */
-@@ -147,17 +134,17 @@ typedef struct _tagPyUFuncObject {
+@@ -147,17 +134,17 @@
          /* The number of elements in 'functions' and 'data' */
          int ntypes;
  
@@ -5885,7 +7822,7 @@ index 95afd5aa2..e5d845842 100644
  
          void *ptr;
          PyObject *obj;
-@@ -184,7 +171,7 @@ typedef struct _tagPyUFuncObject {
+@@ -184,7 +171,7 @@
          int *core_dim_ixs;
          /*
           * positions of 1st core dimensions of each
@@ -5894,7 +7831,7 @@ index 95afd5aa2..e5d845842 100644
           */
          int *core_offsets;
          /* signature string for printing purpose */
-@@ -203,18 +190,56 @@ typedef struct _tagPyUFuncObject {
+@@ -203,18 +190,56 @@
           */
          PyUFunc_LegacyInnerLoopSelectionFunc *legacy_inner_loop_selector;
          /*
@@ -5955,7 +7892,7 @@ index 95afd5aa2..e5d845842 100644
  
  #define UFUNC_ERR_IGNORE 0
  #define UFUNC_ERR_WARN   1
-@@ -236,22 +261,11 @@ typedef struct _tagPyUFuncObject {
+@@ -236,22 +261,11 @@
  #define UFUNC_SHIFT_INVALID      9
  
  
@@ -5979,16 +7916,15 @@ index 95afd5aa2..e5d845842 100644
          (UFUNC_ERR_WARN << UFUNC_SHIFT_DIVIDEBYZERO) +  \
          (UFUNC_ERR_WARN << UFUNC_SHIFT_OVERFLOW) +      \
          (UFUNC_ERR_WARN << UFUNC_SHIFT_INVALID)
-@@ -264,16 +278,22 @@ typedef struct _tagPyUFuncObject {
- #define NPY_LOOP_END_THREADS
+@@ -265,15 +279,21 @@
  #endif
  
-+/*
+ /*
 + * UFunc has unit of 0, and the order of operations can be reordered
 + * This case allows reduction with multiple axes at once.
 + */
 +#define PyUFunc_Zero 0
- /*
++/*
   * UFunc has unit of 1, and the order of operations can be reordered
   * This case allows reduction with multiple axes at once.
   */
@@ -6005,7 +7941,7 @@ index 95afd5aa2..e5d845842 100644
  /*
   * UFunc has no unit, and the order of operations cannot be reordered.
   * This case does not allow reduction with multiple axes at once.
-@@ -284,6 +304,12 @@ typedef struct _tagPyUFuncObject {
+@@ -284,6 +304,12 @@
   * This case allows reduction with multiple axes at once.
   */
  #define PyUFunc_ReorderableNone -2
@@ -6018,7 +7954,7 @@ index 95afd5aa2..e5d845842 100644
  
  #define UFUNC_REDUCE 0
  #define UFUNC_ACCUMULATE 1
-@@ -305,6 +331,8 @@ typedef struct _loop1d_info {
+@@ -305,6 +331,8 @@
          void *data;
          int *arg_types;
          struct _loop1d_info *next;
@@ -6027,7 +7963,7 @@ index 95afd5aa2..e5d845842 100644
  } PyUFunc_Loop1d;
  
  
-@@ -312,132 +340,27 @@ typedef struct _loop1d_info {
+@@ -312,132 +340,27 @@
  
  #define UFUNC_PYVALS_NAME "UFUNC_PYVALS"
  
@@ -6170,10 +8106,9 @@ index 95afd5aa2..e5d845842 100644
  
  
  #ifdef __cplusplus
-diff --git a/include/numpy/utils.h b/include/numpy/utils.h
-index cc968a354..32218b8c7 100644
---- a/include/numpy/utils.h
-+++ b/include/numpy/utils.h
+diff -ru --new-file spacy-2.3.2-orig/include/numpy/utils.h spacy-2.3.2/include/numpy/utils.h
+--- spacy-2.3.2-orig/include/numpy/utils.h	2020-07-13 15:32:36.000000000 +0200
++++ spacy-2.3.2/include/numpy/utils.h	2020-11-11 13:37:37.422412633 +0100
 @@ -6,6 +6,8 @@
                  #define __COMP_NPY_UNUSED __attribute__ ((__unused__))
          # elif defined(__ICC)
