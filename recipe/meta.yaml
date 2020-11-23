@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "2.3.2" %}
-{% set sha256sum = "818de26e0e383f64ccbe3db185574920de05923d8deac8bbb12113b9e33cee1f" %}
+{% set version = "2.3.3.dev0" %}
+{% set sha256sum = "ea302406a3c6e69d42ae3e74fe8872ff6a7bc3f3ffa96d7f54da82f0497445d8" %}
 
 package:
   name: {{ name }}
@@ -14,7 +14,7 @@ source:
 
 
 build:
-  number: 2
+  number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
   skip: true  # [(win and py27) or (osx and py27)]
 
@@ -24,21 +24,21 @@ requirements:
   host:
     - pip
     - python
-    - numpy 1.19.*
+    - numpy
     - setuptools
     - wheel
     - cython >=0.25
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
     - murmurhash >=0.28.0,<1.1.0
-    - thinc ==7.4.1
+    - thinc >=7.4.1,<7.5.0
   run:
     - python
     - {{ pin_compatible('numpy') }}
     - murmurhash >=0.28.0,<1.1.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
-    - thinc ==7.4.1
+    - thinc >=7.4.1,<7.5.0
     - cython-blis >=0.4.0,<0.8.0
     - catalogue >=0.0.7,<1.1.0
     - plac <1.0.0,>=0.9.6
