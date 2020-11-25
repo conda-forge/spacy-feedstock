@@ -48,6 +48,7 @@ requirements:
     - jsonschema
     - pathlib >=1.0.0,<2.0.0  # [py27]
     - importlib-metadata >=0.20
+    - tqdm >=4.38.0,<5.0.0
 
 test:
   requires:
