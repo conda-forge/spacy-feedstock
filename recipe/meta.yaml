@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "2.3.5" %}
-{% set sha256sum = "315278ab60094643baecd866017c7d4cbd966efd2d517ad0e6c888edf7fa5aef" %}
+{% set version = "3.0.0" %}
+{% set sha256sum = "15eb1e0e0864b48f41d0a461d671e8cc1acbafa3af8d1b95f32db50738ace50e" %}
 
 package:
   name: {{ name }}
@@ -8,52 +8,62 @@ package:
 
 source:
   fn: {{ name }}-{{ version }}.tar.gz
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  #url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  url: https://github.com/explosion/spaCy/archive/3a0929977695e811b4441fb6f9d54ce47806eb9d.zip
   sha256: {{ sha256sum }}
-  patches: patches/0002-skip-multiproc-test.patch
 
 
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
-  skip: true  # [(win and py27) or (osx and py27)]
 
 requirements:
   build:
     - {{ compiler('cxx') }}
   host:
     - pip
-    - python
+    - python >=3.6
     - numpy
     - setuptools
     - wheel
     - cython >=0.25
-    - cymem >=2.0.2,<2.1.0
-    - preshed >=3.0.2,<3.1.0
-    - murmurhash >=0.28.0,<1.1.0
-    - thinc >=7.4.1,<7.5.0
-  run:
-    - python
-    - {{ pin_compatible('numpy') }}
     - murmurhash >=0.28.0,<1.1.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
-    - thinc >=7.4.1,<7.5.0
+    - thinc >=8.0.0,<8.1.0
     - cython-blis >=0.4.0,<0.8.0
-    - catalogue >=0.0.7,<1.1.0
-    - plac <1.0.0,>=0.9.6
-    - requests >=2.13.0,<3.0.0
-    - wasabi >=0.4.0,<1.1.0
-    - srsly >=1.0.2,<1.1.0
-    - jsonschema
-    - pathlib >=1.0.0,<2.0.0  # [py27]
-    - importlib-metadata >=0.20
+  run:
+    - python >=3.6
+    # Our libraries
+    - spacy-legacy >=3.0.0,<3.1.0
+    - murmurhash >=0.28.0,<1.1.0
+    - cymem >=2.0.2,<2.1.0
+    - preshed >=3.0.2,<3.1.0
+    - thinc >=8.0.0,<8.1.0
+    - cython-blis >=0.4.0,<0.8.0
+    - wasabi >=0.8.1,<1.1.0
+    - srsly >=2.3.0,<3.0.0
+    - catalogue >=2.0.1,<2.1.0
+    - typer >=0.3.0,<0.4.0
+    - pathy
+    # Third-party dependencies
     - tqdm >=4.38.0,<5.0.0
+    - {{ pin_compatible('numpy') }}
+    - requests >=2.13.0,<3.0.0
+    - pydantic >=1.7.1,<1.8.0
+    - jinja2
+    # Official Python utilities
+    - setuptools
+    - packaging >=20.0
+    - importlib_metadata>=0.20  # [py<=37]
+    - typing_extensions>=3.7.4  # [py<=37]
 
 test:
   requires:
     - pytest
+    - pytest-timeout
     - mock
+    - hypothesis
   imports:
     - spacy
   commands:
