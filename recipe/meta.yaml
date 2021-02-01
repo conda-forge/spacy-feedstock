@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
 {% set version = "3.0.0" %}
-{% set sha256sum = "15eb1e0e0864b48f41d0a461d671e8cc1acbafa3af8d1b95f32db50738ace50e" %}
+{% set sha256sum = "7ab3d9c8bd1c3d5f4d52f6d0f624329d629bd1cba09be992a4bc5c7c475510eb" %}
 
 package:
   name: {{ name }}
@@ -9,7 +9,7 @@ package:
 source:
   fn: {{ name }}-{{ version }}.tar.gz
   #url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  url: https://github.com/explosion/spaCy/archive/3a0929977695e811b4441fb6f9d54ce47806eb9d.zip
+  url: https://github.com/explosion/spaCy/archive/3b9ecd25d8699ec1c5f08173c082d1ec825c5b4d.zip
   sha256: {{ sha256sum }}
 
 
@@ -42,7 +42,7 @@ requirements:
     - thinc >=8.0.0,<8.1.0
     - cython-blis >=0.4.0,<0.8.0
     - wasabi >=0.8.1,<1.1.0
-    - srsly >=2.3.0,<3.0.0
+    - srsly >=2.4.0,<3.0.0
     - catalogue >=2.0.1,<2.1.0
     - typer >=0.3.0,<0.4.0
     - pathy
