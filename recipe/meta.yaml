@@ -66,6 +66,7 @@ test:
     - pytest-timeout
     - mock
     - hypothesis
+    - importlib-metadata ==3.3.0  # [py<38]
   imports:
     - spacy
   commands:
