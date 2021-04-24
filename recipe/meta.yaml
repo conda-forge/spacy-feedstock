@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "3.0.5" %}
-{% set sha256sum = "9f7a09fbad53aac2a3cb7696a902de62b94575a15d249dd5e26a98049328060e" %}
+{% set version = "3.0.6" %}
+{% set sha256sum = "5628ab89f1f568099c880b12a9c37f4ece29ab89260660cfdf728c02711879c5" %}
 
 package:
   name: {{ name }}
@@ -33,20 +33,20 @@ requirements:
     - murmurhash >=0.28.0,<1.1.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
-    - thinc >=8.0.2,<8.1.0
+    - thinc >=8.0.3,<8.1.0
     - cython-blis >=0.4.0,<0.8.0
   run:
     - python
     # Our libraries
-    - spacy-legacy >=3.0.0,<3.1.0
+    - spacy-legacy >=3.0.4,<3.1.0
     - murmurhash >=0.28.0,<1.1.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
-    - thinc >=8.0.2,<8.1.0
+    - thinc >=8.0.3,<8.1.0
     - cython-blis >=0.4.0,<0.8.0
     - wasabi >=0.8.1,<1.1.0
-    - srsly >=2.4.0,<3.0.0
-    - catalogue >=2.0.1,<2.1.0
+    - srsly >=2.4.1,<3.0.0
+    - catalogue >=2.0.3,<2.1.0
     - typer >=0.3.0,<0.4.0
     - pathy >=0.3.5
     # Third-party dependencies
@@ -58,7 +58,6 @@ requirements:
     # Official Python utilities
     - setuptools
     - packaging >=20.0
-    - importlib_metadata >=0.20  # [py<=37]
     - typing_extensions >=3.7.4,<4.0.0.0  # [py<=37]
 
 test:
@@ -67,6 +66,7 @@ test:
     - pytest-timeout
     - mock
     - hypothesis
+    - importlib-metadata ==3.3.0  # [py<38]
   imports:
     - spacy
   commands:
