@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "3.1.1" %}
-{% set sha256sum = "77a0f78d7e65335e5fae13af7e55684770c76a0457ee1baac414ddb89b5df6e4" %}
+{% set version = "3.1.2" %}
+{% set sha256sum = "4bc9faddc9ed4f042ad424af4ff5cb67d193ce4e22ad19d59ff1a14715f113b5" %}
 
 package:
   name: {{ name }}
@@ -10,7 +10,6 @@ source:
   fn: {{ name }}-{{ version }}.tar.gz
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: {{ sha256sum }}
-  patches: patches/0001-remove-bad-grc-test-file.patch
 
 
 build:
