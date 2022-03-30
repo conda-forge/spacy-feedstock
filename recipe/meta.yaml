@@ -50,6 +50,8 @@ requirements:
     - spacy-loggers >=1.0.0,<2.0.0
     # Exclude typer with unpinned click
     - typer >=0.3.2,<0.5.0
+    # Exclude newer click due to typer issues
+    - click <8.1.0
     - pathy >=0.3.5
     # Third-party dependencies
     - tqdm >=4.38.0,<5.0.0
