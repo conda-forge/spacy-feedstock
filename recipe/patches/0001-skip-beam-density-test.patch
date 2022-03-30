@@ -1,0 +1,12 @@
+diff --git a/spacy/tests/parser/test_nn_beam.py b/spacy/tests/parser/test_nn_beam.py
+index 4ba020ef0..7942dfa7f 100644
+--- a/spacy/tests/parser/test_nn_beam.py
++++ b/spacy/tests/parser/test_nn_beam.py
+@@ -128,6 +128,7 @@ def test_beam_parse(examples, beam_width):
+     parser(doc)
+ 
+ 
++@pytest.mark.skip(reason="Flaky, skip temporarily")
+ @hypothesis.given(hyp=hypothesis.strategies.data())
+ def test_beam_density(moves, examples, beam_width, hyp):
+     beam_density = float(hyp.draw(hypothesis.strategies.floats(0.0, 1.0, width=32)))
