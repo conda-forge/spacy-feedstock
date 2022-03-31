@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "3.2.2" %}
-{% set sha256sum = "b3d9a361e1e3c1c1ad0f7f244f2687face420fe2d642d92989cd357944a7d70f" %}
+{% set version = "3.2.4" %}
+{% set sha256sum = "3e4c6f298d54044582daca1142b082ee38831bb3d7bb931d2ee601e8b8dce64f" %}
 
 package:
   name: {{ name }}
@@ -10,6 +10,7 @@ source:
   fn: {{ name }}-{{ version }}.tar.gz
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: {{ sha256sum }}
+  patches: patches/0001-skip-beam-density-test.patch
 
 
 build:
@@ -50,6 +51,8 @@ requirements:
     - spacy-loggers >=1.0.0,<2.0.0
     # Exclude typer with unpinned click
     - typer >=0.3.2,<0.5.0
+    # Exclude newer click due to typer issues
+    - click <8.1.0
     - pathy >=0.3.5
     # Third-party dependencies
     - tqdm >=4.38.0,<5.0.0
