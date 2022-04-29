@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "3.2.4" %}
-{% set sha256sum = "3e4c6f298d54044582daca1142b082ee38831bb3d7bb931d2ee601e8b8dce64f" %}
+{% set version = "3.2.3" %}
+{% set sha256sum = "25d033fc07b8fbfc9bdd37b770b8a586dc414dbd603128449af32576a3891673" %}
 
 package:
   name: {{ name }}
@@ -51,8 +51,6 @@ requirements:
     - spacy-loggers >=1.0.0,<2.0.0
     # Exclude typer with unpinned click
     - typer >=0.3.2,<0.5.0
-    # Exclude newer click due to typer issues
-    - click <8.1.0
     - pathy >=0.3.5
     # Third-party dependencies
     - tqdm >=4.38.0,<5.0.0
