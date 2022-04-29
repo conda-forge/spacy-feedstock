@@ -1,17 +1,12 @@
-{% set name = "spacy" %}
 {% set version = "3.2.3" %}
-{% set sha256sum = "25d033fc07b8fbfc9bdd37b770b8a586dc414dbd603128449af32576a3891673" %}
 
 package:
-  name: {{ name }}
+  name: spacy
   version: {{ version }}
 
 source:
-  fn: {{ name }}-{{ version }}.tar.gz
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: {{ sha256sum }}
-  patches: patches/0001-skip-beam-density-test.patch
-
+  url: https://pypi.io/packages/source/s/spacy/spacy-{{ version }}.tar.gz
+  sha256: 25d033fc07b8fbfc9bdd37b770b8a586dc414dbd603128449af32576a3891673
 
 build:
   number: 0
@@ -25,44 +20,38 @@ requirements:
     - numpy                                  # [build_platform != target_platform]
     - {{ compiler('cxx') }}
   host:
-    - pip
-    - python
-    - numpy
-    - setuptools
-    - wheel
+    - cymem >=2.0.2,<2.1.0
     - cython >=0.25,<3.0
-    - murmurhash >=0.28.0,<1.1.0
-    - cymem >=2.0.2,<2.1.0
-    - preshed >=3.0.2,<3.1.0
-    - thinc >=8.0.12,<8.1.0
     - cython-blis >=0.4.0,<0.8.0
-  run:
+    - murmurhash >=0.28.0,<1.1.0
+    - numpy
+    - pip
+    - preshed >=3.0.2,<3.1.0
     - python
-    # Our libraries
-    - spacy-legacy >=3.0.8,<3.1.0
-    - murmurhash >=0.28.0,<1.1.0
-    - cymem >=2.0.2,<2.1.0
-    - preshed >=3.0.2,<3.1.0
     - thinc >=8.0.12,<8.1.0
-    - cython-blis >=0.4.0,<0.8.0
-    - wasabi >=0.8.1,<1.1.0
-    - srsly >=2.4.1,<3.0.0
-    - catalogue >=2.0.6,<2.1.0
-    - spacy-loggers >=1.0.0,<2.0.0
-    # Exclude typer with unpinned click
-    - typer >=0.3.2,<0.5.0
-    - pathy >=0.3.5
-    # Third-party dependencies
-    - tqdm >=4.38.0,<5.0.0
+  run:
     - {{ pin_compatible('numpy') }}
-    - requests >=2.13.0,<3.0.0
-    - pydantic >=1.7.4,!=1.8,!=1.8.1,<1.9.0
+    - catalogue >=2.0.6,<2.1.0
+    - cymem >=2.0.2,<2.1.0
+    - cython-blis >=0.4.0,<0.8.0
     - jinja2
     - langcodes >=3.2.0,<4.0.0
-    # Official Python utilities
-    - setuptools
+    - murmurhash >=0.28.0,<1.1.0
     - packaging >=20.0
+    - pathy >=0.3.5
+    - preshed >=3.0.2,<3.1.0
+    - pydantic >=1.7.4,!=1.8,!=1.8.1,<1.9.0
+    - python
+    - requests >=2.13.0,<3.0.0
+    - setuptools
+    - spacy-legacy >=3.0.8,<3.1.0
+    - spacy-loggers >=1.0.0,<2.0.0
+    - srsly >=2.4.1,<3.0.0
+    - thinc >=8.0.12,<8.1.0
+    - tqdm >=4.38.0,<5.0.0
+    - typer >=0.3.2,<0.5.0
     - typing_extensions >=3.7.4,<4.0.0.0  # [py<=37]
+    - wasabi >=0.8.1,<1.1.0
 
 test:
   requires:
@@ -73,7 +62,8 @@ test:
   imports:
     - spacy
   commands:
-    - python -m pytest --tb=native --pyargs {{ name }}
+    - pip check
+    - python -m pytest --tb=native --pyargs spacy -k "not beam_density"
 
 about:
   home: https://spacy.io/
