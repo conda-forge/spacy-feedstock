@@ -1,7 +1,7 @@
 About spacy
 ===========
 
-Home: https://spacy.io/
+Home: https://spacy.io
 
 Package license: MIT
 
