@@ -53,6 +53,12 @@ requirements:
     - typing-extensions >=3.7.4,<4.0.0.0  # [py<=37]
     - wasabi >=0.8.1,<1.1.0
 
+# was previously patched out
+{% set skips = ["beam_density"] %}
+
+# segfaults
+{% set skips = skips + ["init_labels"] %}  # [ppc64le]
+
 test:
   requires:
     - hypothesis
@@ -63,7 +69,7 @@ test:
     - spacy
   commands:
     - pip check
-    - pytest -vv --tb=native --pyargs spacy -k "not beam_density"
+    - pytest -vv --tb=native --pyargs spacy -k "not ({{ skips.join(' or ')}})"
 
 about:
   home: https://spacy.io
