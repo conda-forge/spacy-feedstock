@@ -63,7 +63,7 @@ test:
     - spacy
   commands:
     - pip check
-    - python -m pytest --tb=native --pyargs spacy -k "not beam_density"
+    - pytest -vv --tb=native --pyargs spacy -k "not beam_density"
 
 about:
   home: https://spacy.io
