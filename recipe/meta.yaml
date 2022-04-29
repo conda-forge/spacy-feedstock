@@ -69,7 +69,7 @@ test:
     - spacy
   commands:
     - pip check
-    - pytest -vv --tb=native --pyargs spacy -k "not ({{ skips.join(' or ')}})"
+    - pytest -vv --tb=native --pyargs spacy -k "not ({{ skips | join(' or ') }})"
 
 about:
   home: https://spacy.io
