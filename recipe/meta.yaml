@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "3.3.1" %}
-{% set sha256sum = "7f87dbdb104d851ae6ba5fd3a76a2e14e22e048135903e98baf08571a3aa81c0" %}
+{% set version = "3.4.0" %}
+{% set sha256sum = "3ccd1a9f56759e5f0f9efdf57119a06702ad59c045dde0b3830b5472593e09ef" %}
 
 package:
   name: {{ name }}
@@ -34,8 +34,8 @@ requirements:
     - murmurhash >=0.28.0,<1.1.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
-    - thinc >=8.0.14,<8.1.0
-    - cython-blis >=0.4.0,<0.8.0
+    - thinc >=8.1.0,<8.2.0
+    - cython-blis >=0.7.8,<0.8.0
   run:
     - python
     # Our libraries
@@ -43,8 +43,8 @@ requirements:
     - murmurhash >=0.28.0,<1.1.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
-    - thinc >=8.0.14,<8.1.0
-    - cython-blis >=0.4.0,<0.8.0
+    - thinc >=8.1.0,<8.2.0
+    - cython-blis >=0.7.8,<0.8.0
     - wasabi >=0.9.1,<1.1.0
     - srsly >=2.4.3,<3.0.0
     - catalogue >=2.0.6,<2.1.0
@@ -56,13 +56,13 @@ requirements:
     - tqdm >=4.38.0,<5.0.0
     - {{ pin_compatible('numpy') }}
     - requests >=2.13.0,<3.0.0
-    - pydantic >=1.7.4,!=1.8,!=1.8.1,<1.9.0
+    - pydantic >=1.7.4,!=1.8,!=1.8.1,<1.10.0
     - jinja2
     - langcodes >=3.2.0,<4.0.0
     # Official Python utilities
     - setuptools
     - packaging >=20.0
-    - typing_extensions >=3.7.4.1,<4.0.0.0  # [py<=37]
+    - typing_extensions >=3.7.4.1,<4.2.0  # [py<=37]
 
 test:
   requires:
