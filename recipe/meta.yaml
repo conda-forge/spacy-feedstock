@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "3.4.0" %}
-{% set sha256sum = "3ccd1a9f56759e5f0f9efdf57119a06702ad59c045dde0b3830b5472593e09ef" %}
+{% set version = "3.4.1" %}
+{% set sha256sum = "59c5cf5d348a6c0e64a59ac5cfe6cd85d08e866337870c95d1ec6161d531e463" %}
 
 package:
   name: {{ name }}
@@ -35,7 +35,6 @@ requirements:
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
     - thinc >=8.1.0,<8.2.0
-    - cython-blis >=0.7.8,<0.8.0
   run:
     - python
     # Our libraries
@@ -44,7 +43,6 @@ requirements:
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
     - thinc >=8.1.0,<8.2.0
-    - cython-blis >=0.7.8,<0.8.0
     - wasabi >=0.9.1,<1.1.0
     - srsly >=2.4.3,<3.0.0
     - catalogue >=2.0.6,<2.1.0
