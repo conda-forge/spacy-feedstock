@@ -10,7 +10,9 @@ source:
   fn: {{ name }}-{{ version }}.tar.gz
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: {{ sha256sum }}
-  patches: patches/0001-skip-beam-density-test.patch
+  patches:
+  - patches/0001-skip-beam-density-test.patch
+  - patches/0002-evaluate-benchmark-compare-test.patch
 
 
 build:
