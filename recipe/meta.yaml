@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "3.4.4" %}
-{% set sha256sum = "e500cf2cb5f1849461a7928fa269703756069bdfb71559065240af6d0208b08c" %}
+{% set version = "3.5.0" %}
+{% set sha256sum = "fe20127012992778804d93f75ce9370d588573072639c3832cec38f54bf7e4a5" %}
 
 package:
   name: {{ name }}
@@ -10,7 +10,9 @@ source:
   fn: {{ name }}-{{ version }}.tar.gz
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: {{ sha256sum }}
-  patches: patches/0001-skip-beam-density-test.patch
+  patches:
+  - patches/0001-skip-beam-density-test.patch
+  - patches/0002-evaluate-benchmark-compare-test.patch
 
 
 build:
@@ -38,17 +40,16 @@ requirements:
   run:
     - python
     # Our libraries
-    - spacy-legacy >=3.0.10,<3.1.0
+    - spacy-legacy >=3.0.11,<3.1.0
     - murmurhash >=0.28.0,<1.1.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
     - thinc >=8.1.0,<8.2.0
-    - wasabi >=0.9.1,<1.1.0
+    - wasabi >=0.9.1,<1.2.0
     - srsly >=2.4.3,<3.0.0
     - catalogue >=2.0.6,<2.1.0
     - spacy-loggers >=1.0.0,<2.0.0
-    # Exclude typer with unpinned click
-    - typer >=0.3.2,<0.5.0
+    - typer >=0.3.2,<0.8.0
     - pathy >=0.3.5
     # Third-party dependencies
     - tqdm >=4.38.0,<5.0.0
@@ -60,7 +61,7 @@ requirements:
     # Official Python utilities
     - setuptools
     - packaging >=20.0
-    - typing_extensions >=3.7.4.1,<4.2.0  # [py<=37]
+    - typing_extensions >=3.7.4.1,<4.5.0  # [py<=37]
 
 test:
   requires:
