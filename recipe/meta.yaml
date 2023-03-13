@@ -12,7 +12,6 @@ source:
   sha256: {{ sha256sum }}
   patches:
     - patches/0001-skip-beam-density-test.patch
-    - patches/0002-evaluate-benchmark-compare-test.patch
 
 
 build:
