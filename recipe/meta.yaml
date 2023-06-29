@@ -48,7 +48,7 @@ requirements:
     - srsly >=2.4.3,<3.0.0
     - catalogue >=2.0.6,<2.1.0
     - spacy-loggers >=1.0.0,<2.0.0
-    - typer >=0.3.2,<0.8.0
+    - typer >=0.3.2,<0.10.0
     - pathy >=0.10.0
     - smart_open >=5.2.1,<7.0.0
     # Third-party dependencies
