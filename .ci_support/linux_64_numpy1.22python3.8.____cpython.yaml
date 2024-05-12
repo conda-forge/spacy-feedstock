@@ -22,6 +22,8 @@ pin_run_as_build:
     max_pin: x.x
 python:
 - 3.8.* *_cpython
+python_impl:
+- cpython
 target_platform:
 - linux-64
 zip_keys:
@@ -29,3 +31,4 @@ zip_keys:
   - cdt_name
 - - python
   - numpy
+  - python_impl
