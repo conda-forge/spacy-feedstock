@@ -15,7 +15,7 @@ source:
 
 
 build:
-  number: 0
+  number: 1
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
 
 requirements:
@@ -25,6 +25,7 @@ requirements:
     - cython <3.0                            # [build_platform != target_platform]
     - numpy                                  # [build_platform != target_platform]
     - {{ compiler('cxx') }}
+    - {{ stdlib("c") }}
   host:
     - pip
     - python
