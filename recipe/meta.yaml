@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "3.7.3" %}
-{% set sha256sum = "99265028fbdc6e12249c53305e461f79a103637b0e6866c28af0e46365f751e1" %}
+{% set version = "3.7.4" %}
+{% set sha256sum = "525f2ced2e40761562c8cace93ef6a1e6e8c483f27bd564bc1b15f608efbe85b" %}
 
 package:
   name: {{ name }}
@@ -13,8 +13,8 @@ source:
   patches:
     - patches/0001-skip-beam-density-test.patch
 
-
 build:
+  skip: true  # [py==312]
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
 
@@ -25,6 +25,7 @@ requirements:
     - cython <3.0                            # [build_platform != target_platform]
     - numpy                                  # [build_platform != target_platform]
     - {{ compiler('cxx') }}
+    - {{ stdlib("c") }}
   host:
     - pip
     - python
@@ -35,7 +36,7 @@ requirements:
     - murmurhash >=0.28.0,<1.1.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
-    - thinc >=8.1.8,<8.2.0
+    - thinc >=8.1.8,<8.3.0
   run:
     - python
     # Our libraries
@@ -44,6 +45,8 @@ requirements:
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
     - thinc >=8.1.8,<8.3.0
+    # Not Available on conda-forge, ml_datasets is only in requirements.txt and not setup.cg
+    #- ml_datasets >=0.2.0,<0.3.0 
     - wasabi >=0.9.1,<1.2.0
     - srsly >=2.4.3,<3.0.0
     - catalogue >=2.0.6,<2.1.0
@@ -52,7 +55,6 @@ requirements:
     - weasel >=0.1.0,<0.4.0
     # Third-party dependencies
     - {{ pin_compatible('numpy') }}
-    - pathy >=0.10.0
     - smart_open >=5.2.1,<7.0.0
     - tqdm >=4.38.0,<5.0.0
     - requests >=2.13.0,<3.0.0
@@ -76,7 +78,8 @@ test:
   imports:
     - spacy
   commands:
-    - python -m pytest --tb=native --pyargs {{ name }}
+    # tests run slowly on ci servers, so we skip them in particular aarch64 and ppc64le take between 3 hrs to sometimes going over 6 hours and failing.
+    - python -m pytest --tb=native --pyargs {{ name }}  # [not aarch64 and not ppc64le and python_impl == "cpython"]
 
 about:
   home: https://spacy.io/
