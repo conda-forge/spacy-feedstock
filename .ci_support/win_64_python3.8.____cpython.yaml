@@ -6,19 +6,16 @@ channel_targets:
 - conda-forge main
 cxx_compiler:
 - vs2019
-numpy:
-- '1.22'
 pin_run_as_build:
   python:
     min_pin: x.x
     max_pin: x.x
 python:
-- 3.9.* *_cpython
+- 3.8.* *_cpython
 python_impl:
 - cpython
 target_platform:
 - win-64
 zip_keys:
 - - python
-  - numpy
   - python_impl
