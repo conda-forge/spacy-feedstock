@@ -1,6 +1,6 @@
 {% set name = "spacy" %}
-{% set version = "3.7.4" %}
-{% set sha256sum = "525f2ced2e40761562c8cace93ef6a1e6e8c483f27bd564bc1b15f608efbe85b" %}
+{% set version = "3.7.5" %}
+{% set sha256sum = "a648c6cbf2acc7a55a69ee9e7fa4f22bdf69aa828a587a1bc5cfff08cf3c2dd3" %}
 
 package:
   name: {{ name }}
