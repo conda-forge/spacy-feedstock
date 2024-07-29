@@ -336,6 +336,3 @@ Feedstock Maintainers
 * [@ines](https://github.com/ines/)
 * [@rmax](https://github.com/rmax/)
 
-
-<!-- dummy commit to enable rerendering -->
-
