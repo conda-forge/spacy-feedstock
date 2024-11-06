@@ -1,5 +1,5 @@
 {% set name = "spacy" %}
-{% set version = "3.7.6" %}
+{% set version = "3.8.2" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/spacy-{{ version }}.tar.gz
-  sha256: f4065c0aac5c48bbfb2ffe191d55ccb33bfb005376afbd4ccd6d5e9341514e34
+  sha256: 4b37ebd25ada4059b0dc9e0893e70dde5df83485329a068ef04580e70892a65d
   patches:
     - patches/0001-skip-beam-density-test.patch
 
