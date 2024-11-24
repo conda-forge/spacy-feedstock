@@ -15,17 +15,17 @@ cxx_compiler_version:
 docker_image:
 - quay.io/condaforge/linux-anvil-x86_64:alma9
 numpy:
-- '1.22'
+- '1.26'
 pin_run_as_build:
   python:
     min_pin: x.x
     max_pin: x.x
 python:
-- 3.9.* *_cpython
+- 3.12.* *_cpython
 python_impl:
 - cpython
 target_platform:
-- linux-ppc64le
+- linux-64
 zip_keys:
 - - python
   - numpy
