@@ -1,0 +1,19 @@
+From b50b84a8575089023169b0d85ce62b3712c0f3b6 Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Sun, 24 Nov 2024 19:54:31 +1100
+Subject: [PATCH 2/2] explicitly set profile=False in levenshtein.pyx
+
+---
+ spacy/matcher/levenshtein.pyx | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/spacy/matcher/levenshtein.pyx b/spacy/matcher/levenshtein.pyx
+index e394f2cf4..81849d9ab 100644
+--- a/spacy/matcher/levenshtein.pyx
++++ b/spacy/matcher/levenshtein.pyx
+@@ -1,4 +1,4 @@
+-# cython: binding=True, infer_types=True
++# cython: binding=True, infer_types=True, profile=False
+ from cpython.object cimport PyObject
+ from libc.stdint cimport int64_t
+ 
