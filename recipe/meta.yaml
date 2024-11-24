@@ -12,8 +12,6 @@ source:
     - patches/0001-skip-beam-density-test.patch
 
 build:
-  # needs tracing, which cython doesn't support for py312 yet.
-  skip: true  # [py==312]
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
 
