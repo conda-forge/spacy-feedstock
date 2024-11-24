@@ -6,7 +6,7 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/spacy-{{ version }}.tar.gz
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/spacy-{{ version }}.tar.gz
   sha256: f4065c0aac5c48bbfb2ffe191d55ccb33bfb005376afbd4ccd6d5e9341514e34
   patches:
     - patches/0001-skip-beam-density-test.patch
@@ -14,7 +14,7 @@ source:
 build:
   # needs tracing, which cython doesn't support for py312 yet.
   skip: true  # [py==312]
-  number: 0
+  number: 1
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
 
 requirements:
