@@ -1,5 +1,5 @@
 {% set name = "spacy" %}
-{% set version = "3.8.5" %}
+{% set version = "3.8.6" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/spacy-{{ version }}.tar.gz
-  sha256: 38bc8b877fb24f414905ff179620031607cd31fe6f900d67a06730142715651c
+  sha256: 7fecd323a6d085b6b1e0134261a6d311822106cdf325a8e251ae735b065cc46c
   patches:
     - patches/0001-skip-beam-density-test.patch
     # for some reason cython 0.29 picks a non-default (and broken on 3.12)
