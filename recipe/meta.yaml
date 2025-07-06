@@ -74,8 +74,8 @@ test:
   imports:
     - spacy
   commands:
-    # tests run slowly on ci servers, so we skip them in particular aarch64 and ppc64le take between 3 hrs to sometimes going over 6 hours and failing.
-    - python -m pytest --tb=native --pyargs {{ name }}  # [not aarch64 and not ppc64le and python_impl == "cpython"]
+    # avoid long runtime in emulation
+    - python -m pytest --tb=native --pyargs {{ name }}  # [not (aarch64 or ppc64le)]
 
 about:
   home: https://spacy.io/
