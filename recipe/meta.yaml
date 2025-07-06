@@ -14,6 +14,8 @@ source:
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+  # no cython-blis v1.3.x builds (dependency of thinc 8.3.6, which is required for 3.13 support)
+  skip: true  # [ppc64le and py>312]
 
 requirements:
   build:
