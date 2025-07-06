@@ -74,8 +74,11 @@ test:
   imports:
     - spacy
   commands:
+    {% set tests_to_skip = "_not_a_real_test" %}
+    # due to missing https://github.com/explosion/ml-datasets
+    {% set tests_to_skip = tests_to_skip + " or test_registry_entries" %}
     # avoid long runtime in emulation
-    - python -m pytest --tb=native --pyargs {{ name }}  # [not (aarch64 or ppc64le)]
+    - python -m pytest --tb=native --pyargs {{ name }} -k "not ({{ tests_to_skip }})"  # [not (aarch64 or ppc64le)]
 
 about:
   home: https://spacy.io/
