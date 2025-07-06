@@ -1,5 +1,5 @@
 {% set name = "spacy" %}
-{% set version = "3.8.6" %}
+{% set version = "3.8.7" %}
 
 package:
   name: {{ name|lower }}
@@ -7,29 +7,28 @@ package:
 
 source:
   url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/spacy-{{ version }}.tar.gz
-  sha256: 7fecd323a6d085b6b1e0134261a6d311822106cdf325a8e251ae735b065cc46c
+  sha256: 700fd174c6c552276be142c48e70bb53cae24c4dd86003c4432af9cb93e4c908
   patches:
     - patches/0001-skip-beam-density-test.patch
-    # for some reason cython 0.29 picks a non-default (and broken on 3.12)
-    # profile=True for _one_ particular file; suppress it
-    - patches/0002-explicitly-set-profile-False-in-levenshtein.pyx.patch    # [py>=312]
 
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
+  # no cython-blis v1.3.x builds (dependency of thinc 8.3.6, which is required for 3.13 support)
+  skip: true  # [ppc64le and py>312]
 
 requirements:
   build:
     - python                                 # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
-    - cython >=0.25,<3.0                     # [build_platform != target_platform]
+    - cython >=3.0,<4.0                      # [build_platform != target_platform]
     - numpy                                  # [build_platform != target_platform]
     - {{ compiler('cxx') }}
     - {{ stdlib("c") }}
   host:
     - python
     - setuptools
-    - cython >=0.25,<3.0
+    - cython >=3.0,<4.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
     - murmurhash >=0.28.0,<1.1.0
@@ -75,8 +74,11 @@ test:
   imports:
     - spacy
   commands:
-    # tests run slowly on ci servers, so we skip them in particular aarch64 and ppc64le take between 3 hrs to sometimes going over 6 hours and failing.
-    - python -m pytest --tb=native --pyargs {{ name }}  # [not aarch64 and not ppc64le and python_impl == "cpython"]
+    {% set tests_to_skip = "_not_a_real_test" %}
+    # due to missing https://github.com/explosion/ml-datasets
+    {% set tests_to_skip = tests_to_skip + " or test_registry_entries" %}
+    # avoid long runtime in emulation
+    - python -m pytest --tb=native --pyargs {{ name }} -k "not ({{ tests_to_skip }})"  # [not (aarch64 or ppc64le)]
 
 about:
   home: https://spacy.io/
