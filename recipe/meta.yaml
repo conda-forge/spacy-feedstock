@@ -10,9 +10,6 @@ source:
   sha256: 700fd174c6c552276be142c48e70bb53cae24c4dd86003c4432af9cb93e4c908
   patches:
     - patches/0001-skip-beam-density-test.patch
-    # for some reason cython 0.29 picks a non-default (and broken on 3.12)
-    # profile=True for _one_ particular file; suppress it
-    - patches/0002-explicitly-set-profile-False-in-levenshtein.pyx.patch    # [py>=312]
 
 build:
   number: 0
