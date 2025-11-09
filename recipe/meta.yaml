@@ -13,8 +13,8 @@ source:
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
-  # no cython-blis v1.3.x builds (dependency of thinc 8.3.6, which is required for 3.13 support)
-  skip: true  # [ppc64le and py>312]
+  # no cython-blis v1.3.x builds (dependency of newer thinc)
+  skip: true  # [ppc64le]
 
 requirements:
   build:
@@ -76,7 +76,7 @@ test:
     # due to missing https://github.com/explosion/ml-datasets
     {% set tests_to_skip = tests_to_skip + " or test_registry_entries" %}
     # avoid long runtime in emulation
-    - python -m pytest --tb=native --pyargs spacy -k "not ({{ tests_to_skip }})"    # [not (aarch64 or ppc64le)]
+    - python -m pytest --tb=native --pyargs spacy -k "not ({{ tests_to_skip }})"    # [not aarch64]
 
 about:
   home: https://spacy.io/
