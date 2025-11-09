@@ -1,21 +1,20 @@
-{% set name = "spacy" %}
-{% set version = "3.8.7" %}
+{% set version = "3.8.8" %}
 
 package:
-  name: {{ name|lower }}
+  name: spacy
   version: {{ version }}
 
 source:
-  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/spacy-{{ version }}.tar.gz
-  sha256: 700fd174c6c552276be142c48e70bb53cae24c4dd86003c4432af9cb93e4c908
+  url: https://pypi.org/packages/source/s/spacy/spacy-{{ version }}.tar.gz
+  sha256: 08b933bd1f0f47f59321fe730a06c645120084719e718960a2e596a3728aea84
   patches:
     - patches/0001-skip-beam-density-test.patch
 
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
-  # no cython-blis v1.3.x builds (dependency of thinc 8.3.6, which is required for 3.13 support)
-  skip: true  # [ppc64le and py>312]
+  # no cython-blis v1.3.x builds (dependency of newer thinc)
+  skip: true  # [ppc64le]
 
 requirements:
   build:
@@ -44,20 +43,19 @@ requirements:
     - murmurhash >=0.28.0,<1.1.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
-    - thinc >=8.3.0,<8.4.0
+    - thinc >=8.3.4,<8.4.0
     # Not Available on conda-forge, ml_datasets is only in requirements.txt and not setup.cg
     #- ml_datasets >=0.2.0,<0.3.0 
     - wasabi >=0.9.1,<1.2.0
     - srsly >=2.4.3,<3.0.0
     - catalogue >=2.0.6,<2.1.0
-    - weasel >=0.1.0,<0.5.0
     - typer >=0.3.0,<1.0.0
+    - weasel >=0.4.2,<0.5.0
     # Third-party dependencies
     - tqdm >=4.38.0,<5.0.0
     - requests >=2.13.0,<3.0.0
     - pydantic >=1.7.4,!=1.8,!=1.8.1,<3.0.0
     - jinja2
-    - langcodes >=3.2.0,<4.0.0
     # Official Python utilities
     - setuptools
     - packaging >=20.0
@@ -78,7 +76,7 @@ test:
     # due to missing https://github.com/explosion/ml-datasets
     {% set tests_to_skip = tests_to_skip + " or test_registry_entries" %}
     # avoid long runtime in emulation
-    - python -m pytest --tb=native --pyargs {{ name }} -k "not ({{ tests_to_skip }})"  # [not (aarch64 or ppc64le)]
+    - python -m pytest --tb=native --pyargs spacy -k "not ({{ tests_to_skip }})"    # [not aarch64]
 
 about:
   home: https://spacy.io/

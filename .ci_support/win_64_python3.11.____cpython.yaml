@@ -14,7 +14,5 @@ pin_run_as_build:
     max_pin: x.x
 python:
 - 3.11.* *_cpython
-python_impl:
-- cpython
 target_platform:
 - win-64
