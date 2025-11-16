@@ -12,7 +12,7 @@ source:
     - patches/0001-skip-beam-density-test.patch
 
 build:
-  number: 0
+  number: 1
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
   # no cython-blis v1.3.x builds (dependency of newer thinc)
   skip: true  # [ppc64le]
