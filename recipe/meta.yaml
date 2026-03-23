@@ -1,5 +1,5 @@
 {% set tests_to_skip = "_not_a_real_test" %}
-{% set version = "3.8.11" %}
+{% set version = "3.8.13" %}
 
 package:
   name: spacy
@@ -7,12 +7,12 @@ package:
 
 source:
   url: https://pypi.org/packages/source/s/spacy/spacy-{{ version }}.tar.gz
-  sha256: 54e1e87b74a2f9ea807ffd606166bf29ac45e2bd81ff7f608eadc7b05787d90d
+  sha256: eb7c03c2bb16593c34d4c91974118f0931c6e6969dbfe895b1a026c6714176cf
   patches:
     - patches/0001-skip-beam-density-test.patch
 
 build:
-  number: 1
+  number: 0
   script: {{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -vvv
   # no cython-blis v1.3.x builds (dependency of newer thinc)
   skip: true  # [ppc64le]
