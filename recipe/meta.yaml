@@ -10,6 +10,8 @@ source:
   sha256: eb7c03c2bb16593c34d4c91974118f0931c6e6969dbfe895b1a026c6714176cf
   patches:
     - patches/0001-skip-beam-density-test.patch
+    # backport https://github.com/explosion/spaCy/pull/13943
+    - patches/0002-match-confection-bounds-between-requirements.txt-and.patch
 
 build:
   number: 0
