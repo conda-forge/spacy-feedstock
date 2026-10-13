@@ -77,6 +77,12 @@ test:
     {% set tests_to_skip = "_not_a_real_test" %}
     # due to missing https://github.com/explosion/ml-datasets
     {% set tests_to_skip = tests_to_skip + " or test_registry_entries" %}
+    # these reach out to github.com and raw.githubusercontent.com, so they fail
+    # whenever a build runner has no outbound network
+    {% set tests_to_skip = tests_to_skip + " or test_download_compatibility" %}
+    {% set tests_to_skip = tests_to_skip + " or test_validate_compatibility_table" %}
+    {% set tests_to_skip = tests_to_skip + " or test_project_assets" %}
+    {% set tests_to_skip = tests_to_skip + " or test_project_clone" %}
     # avoid long runtime in emulation
     - python -m pytest --tb=native --pyargs spacy -k "not ({{ tests_to_skip }})"    # [not aarch64]
 
