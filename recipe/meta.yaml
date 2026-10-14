@@ -1,4 +1,4 @@
-{% set version = "3.8.14" %}
+{% set version = "3.8.16" %}
 
 package:
   name: spacy
@@ -6,11 +6,9 @@ package:
 
 source:
   url: https://github.com/explosion/spaCy/archive/refs/tags/release-v{{ version }}.tar.gz
-  sha256: ad0ea4e15153de6703a1a77f22c34bdbf105b9362ccde4f4789e02dc9abcb538
+  sha256: e74a8c389fb2b03725ff2d60fea19f39f8019e36a97d5e2a15e9a261bb01ad71
   patches:
     - patches/0001-skip-beam-density-test.patch
-    # backport https://github.com/explosion/spaCy/pull/13943
-    - patches/0002-match-confection-bounds-between-requirements.txt-and.patch
 
 build:
   number: 0
@@ -43,7 +41,7 @@ requirements:
     - spacy-legacy >=3.0.11,<3.1.0
     - spacy-loggers >=1.0.0,<2.0.0
     - murmurhash >=0.28.0,<1.1.0
-    - confection >=1.1.0,<2.0.0
+    - confection >=1.3.2,<2.0.0
     - cymem >=2.0.2,<2.1.0
     - preshed >=3.0.2,<3.1.0
     - thinc >=8.3.12,<8.4.0
@@ -53,6 +51,7 @@ requirements:
     - srsly >=2.5.3,<3.0.0
     - catalogue >=2.0.6,<2.1.0
     - typer >=0.3.0,<1.0.0
+    - click >=8.2.1,<9.0.0
     - weasel >=1.0.0,<2.0.0
     # Third-party dependencies
     - tqdm >=4.38.0,<5.0.0
@@ -78,6 +77,12 @@ test:
     {% set tests_to_skip = "_not_a_real_test" %}
     # due to missing https://github.com/explosion/ml-datasets
     {% set tests_to_skip = tests_to_skip + " or test_registry_entries" %}
+    # these reach out to github.com and raw.githubusercontent.com, so they fail
+    # whenever a build runner has no outbound network
+    {% set tests_to_skip = tests_to_skip + " or test_download_compatibility" %}
+    {% set tests_to_skip = tests_to_skip + " or test_validate_compatibility_table" %}
+    {% set tests_to_skip = tests_to_skip + " or test_project_assets" %}
+    {% set tests_to_skip = tests_to_skip + " or test_project_clone" %}
     # avoid long runtime in emulation
     - python -m pytest --tb=native --pyargs spacy -k "not ({{ tests_to_skip }})"    # [not aarch64]
 
