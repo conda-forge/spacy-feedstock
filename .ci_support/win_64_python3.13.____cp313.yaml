@@ -5,7 +5,9 @@ channel_sources:
 channel_targets:
 - conda-forge main
 cxx_compiler:
-- vs2022
+- vs
+cxx_compiler_version:
+- '2022'
 numpy:
 - '2'
 pin_run_as_build:
